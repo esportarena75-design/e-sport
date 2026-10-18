@@ -6,14 +6,13 @@ import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "rea
 import { MatchStatusBadge } from "@/components/MatchStatusBadge";
 import { NewsCard } from "@/components/NewsCard";
 import { Screen } from "@/components/Screen";
-import { TournamentCard } from "@/components/TournamentCard";
 import { colors } from "@/constants/colors";
 import { useProfile } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useGames } from "@/features/game-accounts/hooks";
 import { useMyMatches } from "@/features/matches/hooks";
 import { useLatestNews } from "@/features/news/hooks";
-import { useTournaments } from "@/features/tournaments/hooks";
+
 import type { Game, MatchPublic } from "@/types/database";
 
 const ACTIVE_MATCH_STATUSES = ["READY", "IN_PROGRESS", "AWAITING_CONFIRMATION"];
@@ -24,9 +23,7 @@ export default function HomeScreen() {
   const { data: profile } = useProfile(myId);
   const { data: games } = useGames();
   const { data: myMatches, isLoading: loadingMatches } = useMyMatches(myId);
-  const { data: newsPages, isLoading: loadingNews } = useTournaments({
-    status: "REGISTRATION_OPEN",
-  });
+ 
   const {
     data: esportNews,
     isLoading: loadingEsportNews,
@@ -36,7 +33,7 @@ export default function HomeScreen() {
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
   const todaysMatches = (myMatches ?? []).filter((m) => ACTIVE_MATCH_STATUSES.includes(m.status));
-  const news = (newsPages?.pages.flat() ?? []).slice(0, 6);
+  
 
   return (
     <Screen>
@@ -105,21 +102,7 @@ export default function HomeScreen() {
         </Section>
 
         <Section title="News">
-          {loadingNews ? (
-            <ActivityIndicator color={colors.primary} />
-          ) : news.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
-              <View className="flex-row gap-3">
-                {news.map((tournament) => (
-                  <View key={tournament.id} className="w-72">
-                    <TournamentCard tournament={tournament} />
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          ) : (
-            <Text className="text-muted">Aucun tournoi disponible pour le moment.</Text>
-          )}
+          
 
           {loadingEsportNews ? (
             <ActivityIndicator color={colors.primary} />

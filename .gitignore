@@ -43,3 +43,9 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+supabase/.temp/
+
+supabase/functions/sync-news/README.md
+
+supabase/.temp/
