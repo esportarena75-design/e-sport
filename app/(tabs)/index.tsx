@@ -145,7 +145,7 @@ function GameCircle({
   return (
     <Pressable onPress={onPress} className="items-center gap-1.5">
       <View
-        className={`h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
+        className={`h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
           selected ? "border-primary" : "border-border"
         }`}
       >
@@ -154,13 +154,13 @@ function GameCircle({
         ) : (
           <Ionicons
             name="game-controller"
-            size={26}
+            size={38}
             color={selected ? colors.primary : colors.muted}
           />
         )}
       </View>
       <Text
-        className={`max-w-[70px] text-center text-xs ${selected ? "text-text" : "text-muted"}`}
+        className={`max-w-[96px] text-center text-sm ${selected ? "text-text" : "text-muted"}`}
         numberOfLines={1}
       >
         {game.name}
