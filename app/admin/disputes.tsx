@@ -4,6 +4,7 @@ import { AdminGuard } from "@/components/AdminGuard";
 import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
+import { toFriendlyAdminError } from "@/features/admin/errors";
 import { useOpenDisputes, useResolveDispute } from "@/features/admin/hooks";
 import { useMatch } from "@/features/matches/hooks";
 import type { Dispute } from "@/types/database";
@@ -66,12 +67,15 @@ function DisputeRow({ dispute }: { dispute: Dispute }) {
       {
         text: "Confirmer",
         onPress: () =>
-          resolveDispute.mutate({
-            disputeId: dispute.id,
-            decision,
-            winnerId,
-            newStatus: winnerId ? "RESOLVED" : "DISMISSED",
-          }),
+          resolveDispute.mutate(
+            {
+              disputeId: dispute.id,
+              decision,
+              winnerId,
+              newStatus: winnerId ? "RESOLVED" : "DISMISSED",
+            },
+            { onError: (error) => Alert.alert("Erreur", toFriendlyAdminError(error)) },
+          ),
       },
     ]);
   };

@@ -19,6 +19,16 @@ describe("reportMatchSchema", () => {
     expect(reportMatchSchema.safeParse({ myScore: "-1", opponentScore: "2" }).success).toBe(false);
   });
 
+  it("rejects a drawn score (single elimination has no draws)", () => {
+    const result = reportMatchSchema.safeParse({ myScore: "2", opponentScore: "2" });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["opponentScore"]);
+  });
+
+  it("treats leading zeros as the same number when detecting a draw", () => {
+    expect(reportMatchSchema.safeParse({ myScore: "02", opponentScore: "2" }).success).toBe(false);
+  });
+
   it("accepts an optional comment", () => {
     const result = reportMatchSchema.safeParse({
       myScore: "4",

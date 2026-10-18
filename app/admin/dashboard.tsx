@@ -6,6 +6,7 @@ import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { StatusBadge } from "@/components/StatusBadge";
 import { colors } from "@/constants/colors";
+import { toFriendlyAdminError } from "@/features/admin/errors";
 import { useAdminTournaments, useOpenDisputes, useUpdateTournamentStatus } from "@/features/admin/hooks";
 import { useGenerateBracket } from "@/features/bracket/hooks";
 import type { TournamentPublic } from "@/types/database";
@@ -64,8 +65,10 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
   const updateStatus = useUpdateTournamentStatus();
   const generateBracket = useGenerateBracket(tournament.id);
 
+  const showError = (error: unknown) => Alert.alert("Erreur", toFriendlyAdminError(error));
+
   const handleCloseRegistration = () => {
-    updateStatus.mutate({ id: tournament.id, status: "REGISTRATION_CLOSED" });
+    updateStatus.mutate({ id: tournament.id, status: "REGISTRATION_CLOSED" }, { onError: showError });
   };
 
   const handleCancel = () => {
@@ -74,7 +77,8 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
       {
         text: "Annuler le tournoi",
         style: "destructive",
-        onPress: () => updateStatus.mutate({ id: tournament.id, status: "CANCELLED" }),
+        onPress: () =>
+          updateStatus.mutate({ id: tournament.id, status: "CANCELLED" }, { onError: showError }),
       },
     ]);
   };
@@ -83,7 +87,7 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
     try {
       await generateBracket.mutateAsync();
     } catch (error) {
-      Alert.alert("Erreur", error instanceof Error ? error.message : "Une erreur est survenue.");
+      showError(error);
     }
   };
 

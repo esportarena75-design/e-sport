@@ -110,7 +110,7 @@ export default function MatchDetailScreen() {
           </Text>
         ) : null}
 
-        {isParticipant && match.status !== "COMPLETED" && match.status !== "CANCELLED" ? (
+        {isParticipant && !isFinished && match.status !== "CANCELLED" ? (
           <Link href={`/match/${match.id}/dispute`} asChild>
             <Pressable className="items-center rounded-2xl border border-border bg-surface px-4 py-3">
               <Text className="text-muted">Signaler un problème</Text>
