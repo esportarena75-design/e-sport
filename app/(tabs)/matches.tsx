@@ -33,7 +33,7 @@ export default function MatchesScreen() {
 
   return (
     <Screen edges={["top"]}>
-      <Text className="py-4 font-bold text-text text-3xl">Mes matchs</Text>
+      <Text className="py-4 font-bold text-text text-2xl">Mes matchs</Text>
       <FlatList
         data={matches ?? []}
         keyExtractor={(item) => item.id}
