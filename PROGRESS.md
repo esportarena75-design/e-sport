@@ -46,6 +46,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - Décision produit attendue pour les exemptions : tirage aléatoire des exemptés, ou priorité aux premiers inscrits ?
 
 ## Journal
+- 2026-10-19 — Session cloud : 6 matchs d'EXEMPLE dans « Today's Matches » (`src/features/matches/demoMatches.ts`, interrupteur `SHOW_DEMO_MATCHES`) pour remplir l'accueil. **À passer à false avant la mise en production.**
 - 2026-10-18 — Session cloud : actus e-sport FR sur l'accueil (`NewsCard`, `features/news`, table `news`, image en moitié de carte avec visuel de secours). Mise à jour automatique : Edge Function `sync-news` (RSS Actu-Lan + Dexerto filtré e-sport, parseur pur dans `supabase/functions/_shared/rss.ts`, testé dans `src/utils/rss.test.ts` via un lanceur tsx car jest indisponible). Déploiement + pg_cron : voir `supabase/functions/sync-news/README.md` (action du dev, le secret `CRON_SECRET` n'est pas dans le repo). Les actus saisies à la main ne sont jamais écrasées ; les automatiques sont purgées après 45 jours. Typecheck/lint/jest non lancés (npm inaccessible) : session locale à vérifier.
 - 2026-10-18 — Session cloud : mise en place de CLAUDE.md (règles communes) et PROGRESS.md.
 - 2026-10-18 — Session cloud : audit complet (migrations, API, écrans). La liste « À faire » était vide, la session a donc corrigé les bugs trouvés et proposé la liste ci-dessus. Choix : correctifs SQL regroupés dans UNE nouvelle migration (aucune migration existante modifiée), fonctions recréées à l'identique hormis les contrôles ajoutés.

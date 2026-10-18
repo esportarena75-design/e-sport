@@ -10,6 +10,7 @@ import { colors } from "@/constants/colors";
 import { useProfile } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useGames } from "@/features/game-accounts/hooks";
+import { DEMO_MATCHES, SHOW_DEMO_MATCHES, type DemoMatch } from "@/features/matches/demoMatches";
 import { useMyMatches } from "@/features/matches/hooks";
 import { useLatestNews } from "@/features/news/hooks";
 
@@ -88,12 +89,15 @@ export default function HomeScreen() {
         <Section title="Today's Matches">
           {loadingMatches ? (
             <ActivityIndicator color={colors.primary} />
-          ) : todaysMatches.length > 0 ? (
+          ) : todaysMatches.length > 0 || SHOW_DEMO_MATCHES ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
               <View className="flex-row gap-3">
                 {todaysMatches.map((match) => (
                   <MatchCarouselCard key={match.id} match={match} myId={myId} />
                 ))}
+                {SHOW_DEMO_MATCHES
+                  ? DEMO_MATCHES.map((match) => <DemoMatchCard key={match.id} match={match} />)
+                  : null}
               </View>
             </ScrollView>
           ) : (
@@ -188,6 +192,40 @@ function MatchCarouselCard({
         vs {opponentName ?? "À déterminer"}
       </Text>
     </Pressable>
+  );
+}
+
+function DemoMatchCard({ match }: { match: DemoMatch }) {
+  return (
+    <View
+      className="gap-3 bg-surface p-4 border border-border rounded-2xl w-64"
+      accessibilityLabel={`Exemple : ${match.game}, ${match.tournament}, contre ${match.opponent}`}
+    >
+      <View className="flex-row justify-between items-center">
+        <View className="flex-row flex-1 items-center gap-2 pr-2">
+          <Ionicons name="game-controller" size={16} color={colors.primary} />
+          <Text className="flex-1 font-medium text-muted text-xs" numberOfLines={1}>
+            {match.game}
+          </Text>
+        </View>
+        <MatchStatusBadge status={match.status} />
+      </View>
+      <View className="gap-0.5">
+        <Text className="font-semibold text-text text-base" numberOfLines={1}>
+          vs {match.opponent}
+        </Text>
+        <Text className="text-muted text-xs" numberOfLines={1}>
+          {match.tournament} · {match.round}
+        </Text>
+      </View>
+      <View className="flex-row justify-between items-center pt-2 border-border border-t">
+        <View className="flex-row items-center gap-1.5">
+          <Ionicons name="time-outline" size={14} color={colors.muted} />
+          <Text className="text-muted text-xs">{match.time}</Text>
+        </View>
+        <Text className="text-muted text-xs italic">Exemple</Text>
+      </View>
+    </View>
   );
 }
 
