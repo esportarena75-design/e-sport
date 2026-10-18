@@ -22,6 +22,7 @@ export default function MatchReportScreen() {
   const reportResult = useReportMatchResult(id ?? "");
   const [serverError, setServerError] = useState<string | null>(null);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageMimeType, setImageMimeType] = useState<string>("image/jpeg");
   const [uploading, setUploading] = useState(false);
 
   const {
@@ -47,6 +48,8 @@ export default function MatchReportScreen() {
     });
     if (!result.canceled && result.assets[0]) {
       setImageUri(result.assets[0].uri);
+      // Une capture peut être en PNG/HEIC : on garde le vrai type pour l'extension du fichier.
+      setImageMimeType(result.assets[0].mimeType ?? "image/jpeg");
     }
   };
 
@@ -62,7 +65,7 @@ export default function MatchReportScreen() {
           matchId: match.id,
           userId: session.user.id,
           fileUri: imageUri,
-          contentType: "image/jpeg",
+          contentType: imageMimeType,
         });
       }
 

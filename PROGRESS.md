@@ -3,8 +3,14 @@
 Fichier de suivi partagé entre toutes les sessions Claude et le dev. Voir les règles dans `CLAUDE.md`.
 
 ## À faire (par priorité)
-<!-- Le dev ou la session locale remplit cette liste. Format : - [ ] Description — critère de "fini" -->
-- [ ] _(à compléter par le dev / la session locale)_
+<!-- Format : - [ ] Description — critère de "fini" -->
+Proposé par la session cloud après audit (le dev peut réordonner / compléter) :
+- [ ] **Exemptions (byes) dans le bracket** — aujourd'hui `generate_bracket` exige exactement 2/4/8/16/32/64 inscrits, sinon refus. Un tournoi de 8 places avec 6 inscrits ne peut pas démarrer. Fini quand : 3 à 64 inscrits génèrent un bracket, les exemptés passent directement au tour 2, test ajouté dans `supabase/tests/scenario.sql` et dans `src/utils/bracket.test.ts`.
+- [ ] **UI admin : forfait, disqualification, sanctions** — les fonctions SQL existent (`admin_forfeit_match`, `disqualify_participant`, `apply_sanction`) mais aucun écran ne les appelle. Fini quand : depuis un match / un joueur, un admin peut déclarer un forfait, disqualifier, avertir/suspendre/bannir, avec confirmation et message d'erreur lisible.
+- [ ] **Annulation de tournoi** — passer un tournoi en `CANCELLED` laisse ses matchs ouverts (joueurs toujours notifiés / peuvent déclarer). Fini quand : annuler passe les matchs non terminés en `CANCELLED` (fonction SQL dédiée, pas un simple update) et l'app n'affiche plus d'action sur ces matchs.
+- [ ] **Clôture automatique des inscriptions** — le statut reste `REGISTRATION_OPEN` après `registration_end` (l'inscription est désormais refusée côté base, mais l'affichage ment). Fini quand : l'app affiche « Inscriptions closes » dès que la date est passée (ou cron `pg_cron` qui bascule le statut).
+- [ ] **Preuves de match** — la policy storage `match_evidence_insert_own` vérifie seulement le dossier utilisateur, pas que l'utilisateur joue ce match. Fini quand : l'insert exige d'être joueur du match (`(storage.foldername(name))[2]`).
+- [ ] **Sanctions** — un ADMIN peut sanctionner un SUPER_ADMIN ou lui-même. Fini quand : interdit côté SQL.
 
 ## En cours
 <!-- - [ ] Tâche — session locale|cloud — date -->
@@ -19,13 +25,23 @@ Fichier de suivi partagé entre toutes les sessions Claude et le dev. Voir les r
 - [x] Dashboard admin, gestion des litiges
 - [x] Tests unitaires : schémas (auth, match, tournoi), bracket, dates
 
+Session cloud, 2026-10-18 (branche `claude/finition`) :
+- [x] **Bug bloquant corrigé : confirmer un résultat ou résoudre un litige échouait toujours** (`advance_winner(uuid, uuid) is not unique`, surcharge créée par la migration admin). Reproduit puis corrigé sur une base locale.
+- [x] **Faille corrigée : n'importe quel utilisateur pouvait appeler `advance_winner` via l'API** et choisir le vainqueur de n'importe quel match.
+- [x] Score nul refusé (formulaire + base), litige impossible sur un match gagné par forfait, litige résolu une seule fois avec vainqueur valide, inscription refusée hors fenêtre de dates, plus aucune RPC accessible sans être connecté.
+- [x] Écrans admin : les erreurs s'affichent (avant : échec silencieux).
+- [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
+
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
-- Aucune pour l'instant. _(Session locale : confirmer que les 11 migrations existantes sont bien appliquées.)_
+- [ ] `20261018000000_fix_advance_winner_and_hardening.sql` — **prioritaire** (sans elle, aucun match ne peut être confirmé). À coller entièrement dans le SQL Editor puis exécuter. Testée sur Postgres 16 avec toutes les migrations précédentes.
+- _(Session locale : confirmer que les 11 migrations précédentes sont bien appliquées.)_
 
 ## Bloqué
 <!-- Ce qui demande une action du dev : clé, décision, test sur appareil… -->
+- L'environnement cloud n'a pas accès au registre npm : `npm run typecheck && npm test && npm run lint` **n'ont pas pu être lancés** sur les commits `a8a5545` et `a09d59f` (seule une vérification de syntaxe a été faite). **Session locale : les lancer avant de merger.**
+- Décision produit attendue pour les exemptions : tirage aléatoire des exemptés, ou priorité aux premiers inscrits ?
 
 ## Journal
 - 2026-10-18 — Session cloud : mise en place de CLAUDE.md (règles communes) et PROGRESS.md.
-  L'environnement cloud n'a pas accès au registre npm pour l'instant : typecheck/tests à lancer côté local.
+- 2026-10-18 — Session cloud : audit complet (migrations, API, écrans). La liste « À faire » était vide, la session a donc corrigé les bugs trouvés et proposé la liste ci-dessus. Choix : correctifs SQL regroupés dans UNE nouvelle migration (aucune migration existante modifiée), fonctions recréées à l'identique hormis les contrôles ajoutés.
