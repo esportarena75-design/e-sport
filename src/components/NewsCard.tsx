@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { Alert, Linking, Pressable, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Image, Linking, Pressable, Text, View } from "react-native";
 
 import { colors, gradients } from "@/constants/colors";
 import type { NewsItem } from "@/types/database";
@@ -15,6 +16,11 @@ async function openSource(url: string) {
 }
 
 export function NewsCard({ news }: { news: NewsItem }) {
+  // Une image distante peut être supprimée ou bloquée : on retombe alors sur le visuel de
+  // secours plutôt que de laisser un trou dans la carte.
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = !!news.image_url && !imageFailed;
+
   return (
     <Pressable
       onPress={() => openSource(news.source_url)}
@@ -23,29 +29,52 @@ export function NewsCard({ news }: { news: NewsItem }) {
       accessibilityLabel={`${news.title}, source ${news.source_name}`}
       accessibilityHint="Ouvre l'article dans le navigateur"
     >
-      <LinearGradient
-        colors={gradients.card}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="flex-row items-center justify-between px-4 py-2.5"
-      >
-        {news.tag ? (
-          <View className="rounded-full bg-primary/20 px-2.5 py-0.5">
-            <Text className="text-xs font-semibold text-primary">{news.tag}</Text>
-          </View>
+      {/* Visuel : environ la moitié de la hauteur de la carte */}
+      <View className="h-36 w-full bg-surface-alt">
+        {showImage ? (
+          <Image
+            source={{ uri: news.image_url! }}
+            className="h-full w-full"
+            resizeMode="cover"
+            onError={() => setImageFailed(true)}
+            accessibilityIgnoresInvertColors
+          />
         ) : (
-          <View />
+          <LinearGradient
+            colors={gradients.hero}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="h-full w-full items-center justify-center"
+          >
+            <Ionicons name="newspaper-outline" size={40} color="rgba(255,255,255,0.45)" />
+          </LinearGradient>
         )}
-        <Text className="text-xs text-muted" numberOfLines={1}>
-          {news.source_name}
-        </Text>
-      </LinearGradient>
 
-      <View className="flex-1 gap-2 p-4">
+        {/* Dégradé sombre en bas pour que la pastille et la source restent lisibles */}
+        <LinearGradient
+          colors={["rgba(18,16,31,0)", "rgba(18,16,31,0.85)"]}
+          className="absolute inset-x-0 bottom-0 h-16"
+          pointerEvents="none"
+        />
+        <View className="absolute inset-x-3 bottom-2 flex-row items-center justify-between">
+          {news.tag ? (
+            <View className="rounded-full bg-primary px-2.5 py-0.5">
+              <Text className="text-xs font-semibold text-white">{news.tag}</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          <Text className="max-w-[55%] text-xs text-white/80" numberOfLines={1}>
+            {news.source_name}
+          </Text>
+        </View>
+      </View>
+
+      <View className="gap-2 p-4" style={{ minHeight: 112 }}>
         <Text className="text-base font-semibold text-text" numberOfLines={2}>
           {news.title}
         </Text>
-        <Text className="text-sm leading-5 text-muted" numberOfLines={3}>
+        <Text className="text-sm leading-5 text-muted" numberOfLines={2}>
           {news.summary}
         </Text>
       </View>
