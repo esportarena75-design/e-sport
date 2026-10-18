@@ -225,3 +225,17 @@ export type Sanction = {
   end_date: string | null;
   created_at: string;
 };
+
+export type NewsItem = {
+  id: string;
+  title: string;
+  summary: string;
+  tag: string | null;
+  source_name: string;
+  source_url: string;
+  image_url: string | null;
+  published_at: string;
+  is_published: boolean;
+  created_by: string | null;
+  created_at: string;
+};

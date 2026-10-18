@@ -4,6 +4,7 @@ import { ReactNode, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 
 import { MatchStatusBadge } from "@/components/MatchStatusBadge";
+import { NewsCard } from "@/components/NewsCard";
 import { Screen } from "@/components/Screen";
 import { TournamentCard } from "@/components/TournamentCard";
 import { colors } from "@/constants/colors";
@@ -11,6 +12,7 @@ import { useProfile } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useGames } from "@/features/game-accounts/hooks";
 import { useMyMatches } from "@/features/matches/hooks";
+import { useLatestNews } from "@/features/news/hooks";
 import { useTournaments } from "@/features/tournaments/hooks";
 import type { Game, MatchPublic } from "@/types/database";
 
@@ -25,6 +27,12 @@ export default function HomeScreen() {
   const { data: newsPages, isLoading: loadingNews } = useTournaments({
     status: "REGISTRATION_OPEN",
   });
+  const {
+    data: esportNews,
+    isLoading: loadingEsportNews,
+    isError: esportNewsError,
+    refetch: refetchEsportNews,
+  } = useLatestNews();
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
   const todaysMatches = (myMatches ?? []).filter((m) => ACTIVE_MATCH_STATUSES.includes(m.status));
@@ -111,6 +119,28 @@ export default function HomeScreen() {
             </ScrollView>
           ) : (
             <Text className="text-muted">Aucun tournoi disponible pour le moment.</Text>
+          )}
+        </Section>
+
+        <Section title="Actus e-sport FR">
+          {loadingEsportNews ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : esportNewsError ? (
+            <Pressable onPress={() => refetchEsportNews()} accessibilityRole="button">
+              <Text className="text-muted">
+                Impossible de charger les actus. <Text className="text-primary">Réessayer</Text>
+              </Text>
+            </Pressable>
+          ) : esportNews && esportNews.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
+              <View className="flex-row gap-3">
+                {esportNews.map((item) => (
+                  <NewsCard key={item.id} news={item} />
+                ))}
+              </View>
+            </ScrollView>
+          ) : (
+            <Text className="text-muted">Aucune actu pour le moment.</Text>
           )}
         </Section>
       </ScrollView>
