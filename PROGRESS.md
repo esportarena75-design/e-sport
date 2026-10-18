@@ -35,6 +35,9 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
 - [ ] `20261018000000_fix_advance_winner_and_hardening.sql` — **prioritaire** (sans elle, aucun match ne peut être confirmé). À coller entièrement dans le SQL Editor puis exécuter. Testée sur Postgres 16 avec toutes les migrations précédentes.
+- [ ] `20261018010000_news.sql` — table `news` + 5 actus de départ (sans elle l'accueil affiche « Impossible de charger les actus »).
+- [ ] `20261018020000_news_images.sql` — images des actus de départ (URLs non vérifiées depuis le cloud).
+- [ ] `20261018030000_news_auto_sync.sql` — colonne `is_auto`, index unique sur `source_url`, dépublie l'actu Vitality périmée. À appliquer dans l'ordre, avant de déployer `sync-news`.
 - _(Session locale : confirmer que les 11 migrations précédentes sont bien appliquées.)_
 
 ## Bloqué
@@ -43,5 +46,6 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - Décision produit attendue pour les exemptions : tirage aléatoire des exemptés, ou priorité aux premiers inscrits ?
 
 ## Journal
+- 2026-10-18 — Session cloud : actus e-sport FR sur l'accueil (`NewsCard`, `features/news`, table `news`, image en moitié de carte avec visuel de secours). Mise à jour automatique : Edge Function `sync-news` (RSS Actu-Lan + Dexerto filtré e-sport, parseur pur dans `supabase/functions/_shared/rss.ts`, testé dans `src/utils/rss.test.ts` via un lanceur tsx car jest indisponible). Déploiement + pg_cron : voir `supabase/functions/sync-news/README.md` (action du dev, le secret `CRON_SECRET` n'est pas dans le repo). Les actus saisies à la main ne sont jamais écrasées ; les automatiques sont purgées après 45 jours. Typecheck/lint/jest non lancés (npm inaccessible) : session locale à vérifier.
 - 2026-10-18 — Session cloud : mise en place de CLAUDE.md (règles communes) et PROGRESS.md.
 - 2026-10-18 — Session cloud : audit complet (migrations, API, écrans). La liste « À faire » était vide, la session a donc corrigé les bugs trouvés et proposé la liste ci-dessus. Choix : correctifs SQL regroupés dans UNE nouvelle migration (aucune migration existante modifiée), fonctions recréées à l'identique hormis les contrôles ajoutés.
