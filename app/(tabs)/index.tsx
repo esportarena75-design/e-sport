@@ -120,9 +120,7 @@ export default function HomeScreen() {
           ) : (
             <Text className="text-muted">Aucun tournoi disponible pour le moment.</Text>
           )}
-        </Section>
 
-        <Section title="Actus e-sport FR">
           {loadingEsportNews ? (
             <ActivityIndicator color={colors.primary} />
           ) : esportNewsError ? (
