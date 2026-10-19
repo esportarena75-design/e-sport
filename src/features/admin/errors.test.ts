@@ -7,6 +7,11 @@ describe("toFriendlyAdminError", () => {
     );
   });
 
+  it("maps sanction hierarchy errors", () => {
+    expect(toFriendlyAdminError(new Error("You cannot sanction yourself"))).toContain("vous-même");
+    expect(toFriendlyAdminError(new Error("Insufficient privileges to sanction this user"))).toContain("rang");
+  });
+
   it("maps an already-handled dispute", () => {
     expect(toFriendlyAdminError(new Error("Dispute is already closed"))).toBe(
       "Ce litige a déjà été traité.",

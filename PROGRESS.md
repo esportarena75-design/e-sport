@@ -6,10 +6,6 @@ Fichier de suivi partagé entre toutes les sessions Claude et le dev. Voir les r
 <!-- Format : - [ ] Description — critère de "fini" -->
 Proposé par la session cloud après audit (le dev peut réordonner / compléter) :
 - [ ] **UI admin : forfait, disqualification, sanctions** — les fonctions SQL existent (`admin_forfeit_match`, `disqualify_participant`, `apply_sanction`) mais aucun écran ne les appelle. Fini quand : depuis un match / un joueur, un admin peut déclarer un forfait, disqualifier, avertir/suspendre/bannir, avec confirmation et message d'erreur lisible.
-- [ ] **Annulation de tournoi** — passer un tournoi en `CANCELLED` laisse ses matchs ouverts (joueurs toujours notifiés / peuvent déclarer). Fini quand : annuler passe les matchs non terminés en `CANCELLED` (fonction SQL dédiée, pas un simple update) et l'app n'affiche plus d'action sur ces matchs.
-- [ ] **Clôture automatique des inscriptions** — le statut reste `REGISTRATION_OPEN` après `registration_end` (l'inscription est désormais refusée côté base, mais l'affichage ment). Fini quand : l'app affiche « Inscriptions closes » dès que la date est passée (ou cron `pg_cron` qui bascule le statut).
-- [ ] **Preuves de match** — la policy storage `match_evidence_insert_own` vérifie seulement le dossier utilisateur, pas que l'utilisateur joue ce match. Fini quand : l'insert exige d'être joueur du match (`(storage.foldername(name))[2]`).
-- [ ] **Sanctions** — un ADMIN peut sanctionner un SUPER_ADMIN ou lui-même. Fini quand : interdit côté SQL.
 
 ## En cours
 <!-- - [ ] Tâche — session locale|cloud — date -->
@@ -30,10 +26,12 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] Score nul refusé (formulaire + base), litige impossible sur un match gagné par forfait, litige résolu une seule fois avec vainqueur valide, inscription refusée hors fenêtre de dates, plus aucune RPC accessible sans être connecté.
 - [x] Écrans admin : les erreurs s'affichent (avant : échec silencieux).
 - [x] **Exemptions (byes)** : `generate_bracket` accepte 2 à max_players inscrits ; les premiers inscrits sont exemptés du tour 1 (match créé en `FORFEIT`, un seul joueur, pour ne pas fausser les stats), bracket affiche « Exempt ». Tests : `supabase/tests/byes.sql`, `isBye` dans `bracket.test.ts`.
+- [x] Annulation de tournoi (matchs ouverts annulés par trigger, notifications), clôture des inscriptions (fonction SQL à planifier), preuves de match (insertion réservée aux joueurs du bon match, lecture réparée), sanctions (pas d'auto-sanction, hiérarchie USER < ADMIN < SUPER_ADMIN). Détail dans la migration `20261019010000`.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261019010000_tournament_lifecycle_and_sanctions.sql` — annulation de tournoi (trigger + `cancel_tournament`), `close_expired_registrations()` (à planifier : `select cron.schedule('close-registrations','*/5 * * * *','select public.close_expired_registrations()');`), preuves de match (policies storage corrigées : l'ancienne policy de lecture ne voyait jamais aucun match à cause de la RLS), hiérarchie des sanctions. Testée sur Postgres 16 (`supabase/tests/lifecycle.sql`).
 - [ ] `20261019000000_bracket_byes.sql` — exemptions : un tournoi démarre avec 2 à max_players inscrits. Testée sur Postgres 16 (2 à 16 inscrits).
 - [ ] `20261018000000_fix_advance_winner_and_hardening.sql` — **prioritaire** (sans elle, aucun match ne peut être confirmé). À coller entièrement dans le SQL Editor puis exécuter. Testée sur Postgres 16 avec toutes les migrations précédentes.
 - [ ] `20261018010000_news.sql` — table `news` + 5 actus de départ (sans elle l'accueil affiche « Impossible de charger les actus »).

@@ -12,6 +12,21 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Too many participants")) {
     return "Il y a plus d'inscrits que de places dans ce tournoi.";
   }
+  if (message.includes("You cannot sanction yourself")) {
+    return "Vous ne pouvez pas vous sanctionner vous-même.";
+  }
+  if (message.includes("Insufficient privileges to sanction")) {
+    return "Vous ne pouvez pas sanctionner un administrateur de rang égal ou supérieur.";
+  }
+  if (message.includes("Tournament is already finished")) {
+    return "Ce tournoi est déjà terminé ou annulé.";
+  }
+  if (message.includes("That player is not in this match")) {
+    return "Ce joueur ne participe pas à ce match.";
+  }
+  if (message.includes("The other slot has no player")) {
+    return "Il n'y a pas d'adversaire à faire avancer sur ce match.";
+  }
   if (message.includes("Bracket already generated")) {
     return "Le bracket de ce tournoi a déjà été généré.";
   }
