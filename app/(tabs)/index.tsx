@@ -145,7 +145,7 @@ function GameCircle({
   return (
     <Pressable onPress={onPress} className="items-center gap-1.5">
       <View
-        className={`h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
+        className={`h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
           selected ? "border-primary" : "border-border"
         }`}
       >
@@ -154,13 +154,13 @@ function GameCircle({
         ) : (
           <Ionicons
             name="game-controller"
-            size={38}
+            size={32}
             color={selected ? colors.primary : colors.muted}
           />
         )}
       </View>
       <Text
-        className={`max-w-[96px] text-center text-sm ${selected ? "text-text" : "text-muted"}`}
+        className={`max-w-[84px] text-center text-sm ${selected ? "text-text" : "text-muted"}`}
         numberOfLines={1}
       >
         {game.name}
@@ -182,7 +182,7 @@ function MatchCarouselCard({
   return (
     <Pressable
       onPress={() => router.push(`/match/${match.id}`)}
-      className="gap-3 bg-surface p-4 border border-border rounded-2xl w-56"
+      className="gap-4 bg-surface p-5 border border-border rounded-2xl w-80"
     >
       <View className="flex-row justify-between items-center">
         <Text className="font-medium text-muted text-xs">Round {match.round}</Text>
@@ -198,32 +198,32 @@ function MatchCarouselCard({
 function DemoMatchCard({ match }: { match: DemoMatch }) {
   return (
     <View
-      className="gap-3 bg-surface p-4 border border-border rounded-2xl w-64"
+      className="gap-4 bg-surface p-5 border border-border rounded-2xl w-80"
       accessibilityLabel={`Exemple : ${match.game}, ${match.tournament}, contre ${match.opponent}`}
     >
       <View className="flex-row justify-between items-center">
         <View className="flex-row flex-1 items-center gap-2 pr-2">
-          <Ionicons name="game-controller" size={16} color={colors.primary} />
-          <Text className="flex-1 font-medium text-muted text-xs" numberOfLines={1}>
+          <Ionicons name="game-controller" size={20} color={colors.primary} />
+          <Text className="flex-1 font-medium text-muted text-sm" numberOfLines={1}>
             {match.game}
           </Text>
         </View>
         <MatchStatusBadge status={match.status} />
       </View>
       <View className="gap-0.5">
-        <Text className="font-semibold text-text text-base" numberOfLines={1}>
+        <Text className="font-bold text-text text-xl" numberOfLines={1}>
           vs {match.opponent}
         </Text>
-        <Text className="text-muted text-xs" numberOfLines={1}>
+        <Text className="text-muted text-sm" numberOfLines={1}>
           {match.tournament} · {match.round}
         </Text>
       </View>
       <View className="flex-row justify-between items-center pt-2 border-border border-t">
         <View className="flex-row items-center gap-1.5">
-          <Ionicons name="time-outline" size={14} color={colors.muted} />
-          <Text className="text-muted text-xs">{match.time}</Text>
+          <Ionicons name="time-outline" size={16} color={colors.muted} />
+          <Text className="text-muted text-sm">{match.time}</Text>
         </View>
-        <Text className="text-muted text-xs italic">Exemple</Text>
+        <Text className="text-muted text-sm italic">Exemple</Text>
       </View>
     </View>
   );
