@@ -23,3 +23,15 @@ export function formatNewsDate(iso: string, now: number = Date.now()): string {
     ...(sameYear ? {} : { year: "numeric" }),
   });
 }
+
+// Le statut en base ne bascule en REGISTRATION_CLOSED que lorsque la tâche planifiée
+// `close_expired_registrations` passe : en attendant, l'affichage tient compte de la date.
+type RegistrationWindow = { status: string; registration_end: string };
+
+export function isRegistrationOpen(t: RegistrationWindow, now: number = Date.now()): boolean {
+  return t.status === "REGISTRATION_OPEN" && new Date(t.registration_end).getTime() > now;
+}
+
+export function displayStatus<S extends string>(t: RegistrationWindow & { status: S }, now: number = Date.now()): S | "REGISTRATION_CLOSED" {
+  return t.status === "REGISTRATION_OPEN" && !isRegistrationOpen(t, now) ? "REGISTRATION_CLOSED" : t.status;
+}

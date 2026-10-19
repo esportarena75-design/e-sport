@@ -14,6 +14,7 @@ import {
   useTournament,
   useTournamentParticipants,
 } from "@/features/tournaments/hooks";
+import { displayStatus, isRegistrationOpen } from "@/utils/time";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
@@ -46,8 +47,9 @@ export default function TournamentDetailScreen() {
 
   const myParticipation = participants?.find((p) => p.user_id === session?.user.id);
   const isFull = tournament.participant_count >= tournament.max_players;
-  const canJoin = tournament.status === "REGISTRATION_OPEN" && !myParticipation && !isFull;
-  const canLeave = tournament.status === "REGISTRATION_OPEN" && !!myParticipation;
+  const registrationOpen = isRegistrationOpen(tournament);
+  const canJoin = registrationOpen && !myParticipation && !isFull;
+  const canLeave = registrationOpen && !!myParticipation;
 
   const handleJoin = async () => {
     setActionError(null);
@@ -81,7 +83,7 @@ export default function TournamentDetailScreen() {
       <ScrollView contentContainerClassName="gap-4 py-6">
         <View className="flex-row justify-between items-start gap-2">
           <Text className="flex-1 font-bold text-text text-2xl">{tournament.name}</Text>
-          <StatusBadge status={tournament.status} />
+          <StatusBadge status={displayStatus(tournament)} />
         </View>
 
         <Text className="text-muted">
@@ -145,7 +147,7 @@ export default function TournamentDetailScreen() {
           />
         ) : null}
 
-        {!myParticipation && isFull && tournament.status === "REGISTRATION_OPEN" ? (
+        {!myParticipation && isFull && registrationOpen ? (
           <Text className="text-muted text-center">Ce tournoi est complet.</Text>
         ) : null}
       </ScrollView>

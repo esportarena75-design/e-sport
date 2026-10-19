@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  applySanction,
+  cancelTournament,
   createTournament,
+  disqualifyParticipant,
+  forfeitMatch,
   listAllTournamentsForAdmin,
   listOpenDisputes,
   resolveDispute,
@@ -55,4 +59,36 @@ export function useResolveDispute() {
       queryClient.invalidateQueries({ queryKey: ["match"] });
     },
   });
+}
+
+function useInvalidateAfterAdminAction(tournamentId?: string) {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-tournaments"] });
+    queryClient.invalidateQueries({ queryKey: ["tournaments"] });
+    queryClient.invalidateQueries({ queryKey: ["tournament"] });
+    queryClient.invalidateQueries({ queryKey: ["tournament-participants"] });
+    queryClient.invalidateQueries({ queryKey: ["matches", tournamentId] });
+    queryClient.invalidateQueries({ queryKey: ["matches"] });
+    queryClient.invalidateQueries({ queryKey: ["match"] });
+  };
+}
+
+export function useCancelTournament() {
+  const invalidate = useInvalidateAfterAdminAction();
+  return useMutation({ mutationFn: cancelTournament, onSuccess: invalidate });
+}
+
+export function useForfeitMatch(tournamentId: string) {
+  const invalidate = useInvalidateAfterAdminAction(tournamentId);
+  return useMutation({ mutationFn: forfeitMatch, onSuccess: invalidate });
+}
+
+export function useDisqualifyParticipant(tournamentId: string) {
+  const invalidate = useInvalidateAfterAdminAction(tournamentId);
+  return useMutation({ mutationFn: disqualifyParticipant, onSuccess: invalidate });
+}
+
+export function useApplySanction() {
+  return useMutation({ mutationFn: applySanction });
 }

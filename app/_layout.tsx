@@ -84,6 +84,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="admin/tournament/[id]/manage"
+          options={{
+            headerShown: true,
+            title: "Gérer le tournoi",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="admin/disputes"
           options={{
             headerShown: true,

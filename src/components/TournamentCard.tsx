@@ -6,6 +6,7 @@ import { Pressable, Text, View } from "react-native";
 import { StatusBadge } from "@/components/StatusBadge";
 import { gradients } from "@/constants/colors";
 import type { TournamentPublic } from "@/types/database";
+import { displayStatus } from "@/utils/time";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR", {
@@ -37,7 +38,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentPublic })
             {tournament.game_name} · {tournament.platform_name}
           </Text>
         </View>
-        <StatusBadge status={tournament.status} />
+        <StatusBadge status={displayStatus(tournament)} />
       </LinearGradient>
 
       <View className="gap-2 p-4">

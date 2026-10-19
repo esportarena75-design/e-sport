@@ -5,7 +5,6 @@ Fichier de suivi partagé entre toutes les sessions Claude et le dev. Voir les r
 ## À faire (par priorité)
 <!-- Format : - [ ] Description — critère de "fini" -->
 Proposé par la session cloud après audit (le dev peut réordonner / compléter) :
-- [ ] **UI admin : forfait, disqualification, sanctions** — les fonctions SQL existent (`admin_forfeit_match`, `disqualify_participant`, `apply_sanction`) mais aucun écran ne les appelle. Fini quand : depuis un match / un joueur, un admin peut déclarer un forfait, disqualifier, avertir/suspendre/bannir, avec confirmation et message d'erreur lisible.
 
 ## En cours
 <!-- - [ ] Tâche — session locale|cloud — date -->
@@ -27,6 +26,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] Écrans admin : les erreurs s'affichent (avant : échec silencieux).
 - [x] **Exemptions (byes)** : `generate_bracket` accepte 2 à max_players inscrits ; les premiers inscrits sont exemptés du tour 1 (match créé en `FORFEIT`, un seul joueur, pour ne pas fausser les stats), bracket affiche « Exempt ». Tests : `supabase/tests/byes.sql`, `isBye` dans `bracket.test.ts`.
 - [x] Annulation de tournoi (matchs ouverts annulés par trigger, notifications), clôture des inscriptions (fonction SQL à planifier), preuves de match (insertion réservée aux joueurs du bon match, lecture réparée), sanctions (pas d'auto-sanction, hiérarchie USER < ADMIN < SUPER_ADMIN). Détail dans la migration `20261019010000`.
+- [x] **UI admin** : écran `app/admin/tournament/[id]/manage.tsx` (bouton « Gérer » du dashboard) : forfait d'un joueur sur un match en cours, disqualification, avertissement / suspension / bannissement, motif obligatoire et confirmation, erreurs en français. Le bouton « Annuler » appelle désormais `cancel_tournament`. Les inscriptions affichent « fermées » dès que `registration_end` est passée (`displayStatus` dans `src/utils/time.ts`).
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
@@ -40,6 +40,8 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - _(Session locale : confirmer que les 11 migrations précédentes sont bien appliquées.)_
 
 ## Bloqué
+- **Typage des routes** : la nouvelle route `/admin/tournament/[id]/manage` n'existe pas encore dans les types générés (`typedRoutes`). Lancer `npx expo start` une fois (ou `npx expo customize tsconfig.json`) pour les régénérer AVANT `npm run typecheck`, sinon une erreur sur `router.push` est normale.
+- **Suspension sans date de fin** : l'UI applique une suspension indéfinie (`end_date` null) ; rien ne lève la suspension automatiquement. À décider : durée fixe + levée par tâche planifiée ?
 <!-- Ce qui demande une action du dev : clé, décision, test sur appareil… -->
 - L'environnement cloud n'a pas accès au registre npm : `npm run typecheck && npm test && npm run lint` **n'ont pas pu être lancés** sur les commits `a8a5545` et `a09d59f` (seule une vérification de syntaxe a été faite). **Session locale : les lancer avant de merger.**
 
