@@ -5,7 +5,7 @@ import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
 import { useMatches } from "@/features/bracket/hooks";
 import type { MatchPublic } from "@/types/database";
-import { roundLabel } from "@/utils/bracket";
+import { isBye, roundLabel } from "@/utils/bracket";
 
 export default function TournamentBracketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -61,21 +61,25 @@ export default function TournamentBracketScreen() {
 
 function MatchNode({ match }: { match: MatchPublic }) {
   const isDone = !!match.winner_id;
+  const bye = isBye(match);
   return (
     <Pressable
-      onPress={() => router.push(`/match/${match.id}`)}
+      onPress={bye ? undefined : () => router.push(`/match/${match.id}`)}
+      disabled={bye}
       className="flex-row overflow-hidden rounded-2xl border border-border bg-surface"
     >
       <View className={`w-1 ${isDone ? "bg-primary" : "bg-border"}`} />
       <View className="flex-1 gap-2 p-3">
         <PlayerRow
           name={match.player_1_username}
+          emptyLabel={bye ? "Exempt" : "À déterminer"}
           score={match.player_1_score}
           isWinner={isDone && match.winner_id === match.player_1_id}
         />
         <View className="h-px bg-border" />
         <PlayerRow
           name={match.player_2_username}
+          emptyLabel={bye ? "Exempt" : "À déterminer"}
           score={match.player_2_score}
           isWinner={isDone && match.winner_id === match.player_2_id}
         />
@@ -86,10 +90,12 @@ function MatchNode({ match }: { match: MatchPublic }) {
 
 function PlayerRow({
   name,
+  emptyLabel,
   score,
   isWinner,
 }: {
   name: string | null;
+  emptyLabel: string;
   score: number | null;
   isWinner: boolean;
 }) {
@@ -108,7 +114,7 @@ function PlayerRow({
           className={isWinner ? "flex-1 font-semibold text-text" : "flex-1 text-muted"}
           numberOfLines={1}
         >
-          {name ?? "À déterminer"}
+          {name ?? emptyLabel}
         </Text>
       </View>
       {score !== null ? (

@@ -3,7 +3,7 @@ import type { MatchStatus } from "@/types/database";
 // Matchs d'EXEMPLE affichés sur l'accueil pour remplir la page pendant le développement.
 // Ils ne viennent pas de la base et ne mènent nulle part. Pour les retirer :
 // passer SHOW_DEMO_MATCHES à false (ou supprimer ce fichier et son usage dans l'accueil).
-export const SHOW_DEMO_MATCHES = true;
+export const SHOW_DEMO_MATCHES = false;
 
 export type DemoMatch = {
   id: string;

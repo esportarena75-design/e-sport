@@ -21,3 +21,5 @@ done
 
 echo "=== Scénario (les lignes 'doit echouer' doivent afficher une ERROR explicite)"
 psql -d arena_test -f "$DIR/scenario.sql" 2>&1 | grep -E "TEST|doit|correcte|ERROR|COMPLETED|FORFEIT|DISPUTED|READY|SCHEDULED| t$| f$"
+echo "=== Exemptions (byes)"
+psql -d arena_test -f "$DIR/byes.sql" 2>&1 | grep -E "n=|doit|ERROR|Not enough"

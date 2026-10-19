@@ -9,8 +9,8 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Not enough participants")) {
     return "Il faut au moins 2 joueurs inscrits pour générer le bracket.";
   }
-  if (message.includes("power of two")) {
-    return "Le nombre d'inscrits doit être 2, 4, 8, 16, 32 ou 64 (les exemptions ne sont pas encore gérées).";
+  if (message.includes("Too many participants")) {
+    return "Il y a plus d'inscrits que de places dans ce tournoi.";
   }
   if (message.includes("Bracket already generated")) {
     return "Le bracket de ce tournoi a déjà été généré.";
