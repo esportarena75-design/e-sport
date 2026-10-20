@@ -45,7 +45,8 @@ jobs:
           PGHOST: localhost
           PGUSER: postgres
           PGPASSWORD: postgres
+        shell: bash
         run: |
           chmod +x supabase/tests/run.sh
           ./supabase/tests/run.sh | tee sql-report.txt
-          if grep -q "ECHEC" sql-report.txt; then exit 1; fi
+          if grep -qE "ÉCHEC|ECHEC" sql-report.txt; then exit 1; fi
