@@ -37,6 +37,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261022010000_tournaments_won_forfeit_final.sql` — une finale gagnée par forfait compte comme titre dans `player_stats`. Testée.
 - [ ] `20261022000000_match_scheduling_and_suspensions.sql` — `admin_schedule_match` (planifier un match, joueurs notifiés), `apply_sanction` refuse une date de fin passée, `lift_expired_suspensions()` à planifier : `select cron.schedule('lift-suspensions','*/10 * * * *','select public.lift_expired_suspensions()');`. Testée (`supabase/tests/schedule.sql`).
 - [ ] `20261021010000_delete_own_account.sql` — vraie suppression de compte (anonymisation du profil, e-mail/mot de passe effacés, compte bloqué, forfait des matchs en cours). Testée (`supabase/tests/account.sql`). ⚠ écrit dans `auth.users` / `auth.identities` / `auth.sessions` : à tester une fois sur un compte jetable dans Supabase.
 - [ ] `20261021000000_matches_public_tournament_info.sql` — ajoute `tournament_name` et `tournament_start_date` à la vue `matches_public` (date affichée dans « Mes matchs »). Testée sur Postgres 16.

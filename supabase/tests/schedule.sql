@@ -7,7 +7,7 @@ select set_config('request.jwt.claim.sub','',false), set_config('request.jwt.cla
 update profiles set role='ADMIN' where id='00000000-0000-0000-0000-000000000001';
 
 select m.id as mid, m.player_1_id as p1 from matches m join tournaments t on t.id = m.tournament_id
- where t.name = 'Byes 10' and m.round = 1 and m.match_number = 2 \gset
+ where t.name = 'Byes 10' and m.round = 1 and m.status = 'READY' and m.player_2_id is not null order by m.match_number limit 1 \gset
 select id as target from profiles where id = '00000000-0000-0000-0000-000000000005' \gset
 
 \echo '--- PLANIF 1 : un joueur planifie un match (doit echouer)'
@@ -45,3 +45,12 @@ select case when public.lift_expired_suspensions() = 0 then 'ok suspension indef
 select pg_temp.as_user('00000000-0000-0000-0000-000000000001'); set role authenticated;
 select public.lift_expired_suspensions();
 reset role;
+
+\echo '--- TITRES : une finale gagnee par forfait compte (assertions)'
+begin;
+select m.id as fid, '00000000-0000-0000-0000-000000000005'::uuid as champion from matches m join tournaments t on t.id = m.tournament_id
+ where t.name = 'Byes 10' and m.next_match_id is null \gset
+select tournaments_won as avant from player_stats where user_id = :'champion' \gset
+update matches set status = 'FORFEIT', winner_id = :'champion' where id = :'fid';
+select case when tournaments_won = :avant + 1 then 'ok titre compte apres forfait' else 'ECHEC titre non compte' end as r from player_stats where user_id = :'champion';
+rollback;
