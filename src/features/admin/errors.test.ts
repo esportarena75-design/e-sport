@@ -24,6 +24,11 @@ describe("toFriendlyAdminError", () => {
     );
   });
 
+  it("maps scheduling errors", () => {
+    expect(toFriendlyAdminError(new Error("Scheduled date must be in the future"))).toContain("futur");
+    expect(toFriendlyAdminError(new Error("Match can no longer be scheduled"))).toContain("planifié");
+  });
+
   it("falls back to a generic message", () => {
     expect(toFriendlyAdminError("boom")).toBe("Une erreur est survenue. Réessayez.");
   });

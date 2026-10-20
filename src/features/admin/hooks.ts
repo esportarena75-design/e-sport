@@ -9,6 +9,7 @@ import {
   listAllTournamentsForAdmin,
   listOpenDisputes,
   resolveDispute,
+  scheduleMatch,
   updateTournamentStatus,
 } from "@/features/admin/api";
 
@@ -91,4 +92,9 @@ export function useDisqualifyParticipant(tournamentId: string) {
 
 export function useApplySanction() {
   return useMutation({ mutationFn: applySanction });
+}
+
+export function useScheduleMatch(tournamentId: string) {
+  const invalidate = useInvalidateAfterAdminAction(tournamentId);
+  return useMutation({ mutationFn: scheduleMatch, onSuccess: invalidate });
 }

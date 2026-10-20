@@ -42,6 +42,15 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Winner must be one of the match players")) {
     return "Le vainqueur choisi ne fait pas partie de ce match.";
   }
+  if (message.includes("Scheduled date must be in the future")) {
+    return "Choisissez une date et une heure dans le futur.";
+  }
+  if (message.includes("Match can no longer be scheduled")) {
+    return "Ce match ne peut plus être planifié (déjà commencé ou terminé).";
+  }
+  if (message.includes("Invalid end date")) {
+    return "La date de fin de suspension est invalide.";
+  }
   if (message.includes("already closed")) {
     return "Ce match est déjà terminé.";
   }

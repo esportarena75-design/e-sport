@@ -32,10 +32,12 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **3 onglets en 1** : les onglets « Mes matchs » et « Classement » sont supprimés, ils vivent dans l'onglet Profil via un sélecteur Profil / Mes matchs / Classement (`app/(tabs)/profile.tsx`, `src/features/profile/sections/`). Mes matchs : « À venir » (date, heure, compte à rebours à la seconde) puis « Historique ». Classement : top 20 + ma position si je suis plus loin.
 - [x] **Mot de passe oublié complet** : le mail contient un lien qui rouvre l'appli sur `app/reset-password.tsx` (nouveau mot de passe + confirmation). Parseur d'URL testé (`src/features/auth/redirect.ts`). ⚠ Réglage Supabase requis : Authentication > URL Configuration > Redirect URLs : ajouter `esportapp://reset-password` (build) et l'URL `exp://…/--/reset-password` affichée par Expo Go.
 - [x] **ErrorBoundary global** (`app/_layout.tsx`) + **pages légales** CGU / confidentialité / règlement (`app/legal/[doc].tsx`, textes dans `src/constants/legal.ts`, liens « Lire le document » sous les cases d'inscription). ⚠ Textes = BROUILLONS à faire valider par un juriste (éditeur, contact RGPD, durées).
+- [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261022000000_match_scheduling_and_suspensions.sql` — `admin_schedule_match` (planifier un match, joueurs notifiés), `apply_sanction` refuse une date de fin passée, `lift_expired_suspensions()` à planifier : `select cron.schedule('lift-suspensions','*/10 * * * *','select public.lift_expired_suspensions()');`. Testée (`supabase/tests/schedule.sql`).
 - [ ] `20261021010000_delete_own_account.sql` — vraie suppression de compte (anonymisation du profil, e-mail/mot de passe effacés, compte bloqué, forfait des matchs en cours). Testée (`supabase/tests/account.sql`). ⚠ écrit dans `auth.users` / `auth.identities` / `auth.sessions` : à tester une fois sur un compte jetable dans Supabase.
 - [ ] `20261021000000_matches_public_tournament_info.sql` — ajoute `tournament_name` et `tournament_start_date` à la vue `matches_public` (date affichée dans « Mes matchs »). Testée sur Postgres 16.
 - [ ] `20261020000000_profile_edit.sql` — bucket public `avatars` (2 Mo, jpeg/png/webp) + policies, bio ≤ 160, avatar https, pseudo modifiable tous les 14 jours, et **durcissement : le client ne peut plus modifier `birth_date` ni les dates de consentement** (revoke update + grant sur colonnes). Testée sur Postgres 16 (`supabase/tests/profile.sql`).
@@ -50,7 +52,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 ## Bloqué
 - **Photo de profil, à vérifier sur appareil** : `allowsEditing` / `aspect` d'expo-image-picker n'ont pas pu être vérifiés dans la doc Expo v57 (consultation refusée) ; ils existent dans les versions précédentes. Tester le choix + recadrage d'une photo sur iOS et Android. Les photos sont en lecture publique (bucket public), cohérent avec `public_profiles`.
 - **Typage des routes** : la nouvelle route `/admin/tournament/[id]/manage` n'existe pas encore dans les types générés (`typedRoutes`). Lancer `npx expo start` une fois (ou `npx expo customize tsconfig.json`) pour les régénérer AVANT `npm run typecheck`, sinon une erreur sur `router.push` est normale.
-- **Suspension sans date de fin** : l'UI applique une suspension indéfinie (`end_date` null) ; rien ne lève la suspension automatiquement. À décider : durée fixe + levée par tâche planifiée ?
+- **Suspension** : penser à planifier `lift_expired_suspensions()` (voir migrations) ; une suspension « indéfinie » n'est jamais levée automatiquement.
 <!-- Ce qui demande une action du dev : clé, décision, test sur appareil… -->
 - _(La CI GitHub Actions lance typecheck, lint, jest et les scénarios SQL à chaque push : plus de blocage de ce côté.)_
 

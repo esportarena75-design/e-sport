@@ -105,12 +105,25 @@ export async function disqualifyParticipant(input: {
 
 export type SanctionType = "WARNING" | "SUSPENSION" | "BAN";
 
-export async function applySanction(input: { userId: string; type: SanctionType; reason: string }) {
+export async function applySanction(input: {
+  userId: string;
+  type: SanctionType;
+  reason: string;
+  endDate?: Date | null;
+}) {
   const { error } = await supabase.rpc("apply_sanction", {
     p_user_id: input.userId,
     p_type: input.type,
     p_reason: input.reason,
-    p_end_date: null,
+    p_end_date: input.endDate ? input.endDate.toISOString() : null,
+  });
+  if (error) throw error;
+}
+
+export async function scheduleMatch(input: { matchId: string; scheduledAt: Date }) {
+  const { error } = await supabase.rpc("admin_schedule_match", {
+    p_match_id: input.matchId,
+    p_scheduled_at: input.scheduledAt.toISOString(),
   });
   if (error) throw error;
 }

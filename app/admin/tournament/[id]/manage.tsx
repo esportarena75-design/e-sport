@@ -4,6 +4,8 @@ import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 
 import { AdminGuard } from "@/components/AdminGuard";
 import { Button } from "@/components/Button";
+import { ChipSelect } from "@/components/ChipSelect";
+import { DateField } from "@/components/DateField";
 import { Input } from "@/components/Input";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
@@ -13,12 +15,19 @@ import {
   useApplySanction,
   useDisqualifyParticipant,
   useForfeitMatch,
+  useScheduleMatch,
 } from "@/features/admin/hooks";
 import { useMatches } from "@/features/bracket/hooks";
 import { useTournament, useTournamentParticipants } from "@/features/tournaments/hooks";
 import type { MatchPublic, TournamentParticipantPublic } from "@/types/database";
 import { isBye } from "@/utils/bracket";
+import {
+  SUSPENSION_DURATIONS,
+  suspensionEndDate,
+  type SuspensionDurationValue,
+} from "@/utils/sanctions";
 
+const SCHEDULABLE_STATUSES = ["SCHEDULED", "READY"];
 const OPEN_MATCH_STATUSES = ["READY", "IN_PROGRESS", "AWAITING_CONFIRMATION", "DISPUTED"];
 
 const SANCTION_LABELS: Record<SanctionType, string> = {
@@ -43,6 +52,8 @@ function ManageTournamentContent() {
   const forfeit = useForfeitMatch(id);
   const disqualify = useDisqualifyParticipant(id);
   const sanction = useApplySanction();
+  const schedule = useScheduleMatch(id);
+  const [suspensionDuration, setSuspensionDuration] = useState<SuspensionDurationValue>("7");
   // Le motif est commun à toutes les actions de l'écran : il est journalisé et envoyé au joueur.
   const [reason, setReason] = useState("");
 
@@ -85,15 +96,43 @@ function ManageTournamentContent() {
     );
 
   const handleSanction = (p: TournamentParticipantPublic, type: SanctionType) =>
-    confirm(SANCTION_LABELS[type], `${p.username} recevra une sanction (${type}).`, () =>
+    confirm(
+      SANCTION_LABELS[type],
+      type === "SUSPENSION"
+        ? `${p.username} sera suspendu (${SUSPENSION_DURATIONS.find((d) => d.value === suspensionDuration)?.label.toLowerCase()}).`
+        : `${p.username} recevra une sanction (${type}).`,
+      () =>
       sanction.mutate(
-        { userId: p.user_id, type, reason: trimmedReason },
+        {
+          userId: p.user_id,
+          type,
+          reason: trimmedReason,
+          endDate: type === "SUSPENSION" ? suspensionEndDate(suspensionDuration) : null,
+        },
         {
           onSuccess: () => Alert.alert("Sanction appliquée", `${p.username} a été prévenu.`),
           onError: showError,
         },
       ),
     );
+
+  const handleSchedule = (match: MatchPublic, date: Date) =>
+    Alert.alert(
+      "Planifier le match",
+      `Fixer le match au ${date.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "short" })} ? Les deux joueurs seront prévenus.`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Planifier",
+          onPress: () =>
+            schedule.mutate({ matchId: match.id, scheduledAt: date }, { onError: showError }),
+        },
+      ],
+    );
+
+  const schedulableMatches = (matches ?? []).filter(
+    (m) => SCHEDULABLE_STATUSES.includes(m.status) && m.player_1_id && m.player_2_id && !isBye(m),
+  );
 
   const openMatches = (matches ?? []).filter(
     (m) => OPEN_MATCH_STATUSES.includes(m.status) && !isBye(m),
@@ -153,7 +192,38 @@ function ManageTournamentContent() {
         </View>
 
         <View className="gap-3">
+          <Text className="text-lg font-semibold text-text">Planifier les matchs</Text>
+          {schedulableMatches.length === 0 ? (
+            <Text className="text-muted">Aucun match à planifier.</Text>
+          ) : (
+            schedulableMatches.map((match) => (
+              <View key={match.id} className="gap-3 rounded-2xl border border-border bg-surface p-4">
+                <Text className="font-semibold text-text">
+                  Tour {match.round} · match {match.match_number}
+                </Text>
+                <Text className="text-muted">
+                  {match.player_1_username ?? "?"} vs {match.player_2_username ?? "?"}
+                </Text>
+                <DateField
+                  label={match.scheduled_at ? "Date prévue (modifier)" : "Date et heure"}
+                  mode="datetime"
+                  value={match.scheduled_at ? new Date(match.scheduled_at) : undefined}
+                  minimumDate={new Date()}
+                  onChange={(date) => handleSchedule(match, date)}
+                />
+              </View>
+            ))
+          )}
+        </View>
+
+        <View className="gap-3">
           <Text className="text-lg font-semibold text-text">Participants</Text>
+          <ChipSelect
+            label="Durée d'une suspension"
+            options={SUSPENSION_DURATIONS.map((d) => ({ value: d.value, label: d.label }))}
+            value={suspensionDuration}
+            onChange={(value) => setSuspensionDuration(value as SuspensionDurationValue)}
+          />
           {(participants ?? []).map((p) => (
             <View key={p.id} className="gap-3 rounded-2xl border border-border bg-surface p-4">
               <View className="flex-row items-center justify-between">
