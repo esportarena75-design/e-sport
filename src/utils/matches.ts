@@ -11,7 +11,9 @@ export function getMatchStart(match: StartInfo): string | null {
   return match.scheduled_at ?? (match.round === 1 ? match.tournament_start_date : null);
 }
 
-type SortableMatch = StartInfo & Pick<MatchPublic, "status" | "completed_at" | "created_at">;
+// `status` est un simple string ici : la comparaison se fait contre UPCOMING_STATUSES, et les tests
+// passent des objets littéraux dont le statut n'est pas typé MatchStatus.
+type SortableMatch = StartInfo & { status: string; completed_at: string | null; created_at: string };
 
 // Sépare « à venir » (par date croissante, sans date en dernier) et « historique » (récents d'abord).
 export function splitMyMatches<T extends SortableMatch>(matches: T[]): { upcoming: T[]; history: T[] } {
