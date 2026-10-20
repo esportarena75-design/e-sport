@@ -37,10 +37,21 @@ export async function resetPassword(email: string) {
   if (error) throw error;
 }
 
+// Suppression réelle : photos supprimées, profil anonymisé, e-mail effacé et compte bloqué côté base
+// (fonction SQL delete_own_account). La session locale est fermée sans appel serveur : ses jetons
+// viennent d'être révoqués.
 export async function deleteOwnAccount(userId: string) {
-  const { error } = await supabase.from("profiles").update({ status: "DELETED" }).eq("id", userId);
+  try {
+    const { data } = await supabase.storage.from("avatars").list(userId);
+    const files = (data ?? []).map((file) => `${userId}/${file.name}`);
+    if (files.length > 0) await supabase.storage.from("avatars").remove(files);
+  } catch {
+    // Les photos orphelines ne doivent pas empêcher la suppression du compte.
+  }
+
+  const { error } = await supabase.rpc("delete_own_account");
   if (error) throw error;
-  await signOut();
+  await supabase.auth.signOut({ scope: "local" });
 }
 
 export async function getProfile(userId: string): Promise<Profile> {

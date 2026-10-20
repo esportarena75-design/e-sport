@@ -11,6 +11,7 @@ import { Screen } from "@/components/Screen";
 import { SegmentedControl } from "@/components/SegmentedControl";
 import { colors, gradients } from "@/constants/colors";
 import { deleteOwnAccount, signOut } from "@/features/auth/api";
+import { toFriendlyAccountError } from "@/features/auth/errors";
 import { useProfile } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useDeleteGameAccount, useGameAccounts } from "@/features/game-accounts/hooks";
@@ -86,19 +87,28 @@ function ProfileSection({ userId }: { userId: string | undefined }) {
   };
 
   const handleDelete = () => {
-    Alert.alert("Supprimer le compte", "Cette action est irréversible. Confirmer ?", [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          if (!session) return;
-          setBusy(true);
-          await deleteOwnAccount(session.user.id);
-          setBusy(false);
+    Alert.alert(
+      "Supprimer le compte",
+      "Votre profil sera anonymisé, vos données personnelles effacées et vos matchs en cours perdus par forfait. Cette action est irréversible.",
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer définitivement",
+          style: "destructive",
+          onPress: async () => {
+            if (!session) return;
+            setBusy(true);
+            try {
+              await deleteOwnAccount(session.user.id);
+            } catch (error) {
+              Alert.alert("Suppression impossible", toFriendlyAccountError(error));
+            } finally {
+              setBusy(false);
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   return (

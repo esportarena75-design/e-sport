@@ -15,3 +15,15 @@ export function toFriendlyErrorMessage(error: unknown): string {
   }
   return "Une erreur est survenue. Réessayez.";
 }
+
+export function toFriendlyAccountError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("Administrators cannot delete")) {
+    return "Un administrateur ne peut pas supprimer son compte. Demandez d'abord le retrait de votre rôle.";
+  }
+  if (message.includes("already deleted")) {
+    return "Ce compte est déjà supprimé.";
+  }
+  return "Une erreur est survenue. Réessayez.";
+}

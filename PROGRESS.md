@@ -34,6 +34,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261021010000_delete_own_account.sql` — vraie suppression de compte (anonymisation du profil, e-mail/mot de passe effacés, compte bloqué, forfait des matchs en cours). Testée (`supabase/tests/account.sql`). ⚠ écrit dans `auth.users` / `auth.identities` / `auth.sessions` : à tester une fois sur un compte jetable dans Supabase.
 - [ ] `20261021000000_matches_public_tournament_info.sql` — ajoute `tournament_name` et `tournament_start_date` à la vue `matches_public` (date affichée dans « Mes matchs »). Testée sur Postgres 16.
 - [ ] `20261020000000_profile_edit.sql` — bucket public `avatars` (2 Mo, jpeg/png/webp) + policies, bio ≤ 160, avatar https, pseudo modifiable tous les 14 jours, et **durcissement : le client ne peut plus modifier `birth_date` ni les dates de consentement** (revoke update + grant sur colonnes). Testée sur Postgres 16 (`supabase/tests/profile.sql`).
 - [ ] `20261019010000_tournament_lifecycle_and_sanctions.sql` — annulation de tournoi (trigger + `cancel_tournament`), `close_expired_registrations()` (à planifier : `select cron.schedule('close-registrations','*/5 * * * *','select public.close_expired_registrations()');`), preuves de match (policies storage corrigées : l'ancienne policy de lecture ne voyait jamais aucun match à cause de la RLS), hiérarchie des sanctions. Testée sur Postgres 16 (`supabase/tests/lifecycle.sql`).
