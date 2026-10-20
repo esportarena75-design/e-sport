@@ -17,12 +17,20 @@ jobs:
           cache: npm
       - run: npm ci
       # Le client Supabase exige ces variables au chargement ; des valeurs factices suffisent ici.
+      # Chaque étape recopie sa sortie dans une annotation : le détail reste lisible via l'API
+      # GitHub (check-runs/<id>/annotations) même quand les logs ne sont pas accessibles.
       - name: Typecheck
-        run: npm run typecheck
+        shell: bash
+        run: |
+          npm run typecheck 2>&1 | tee out.txt || { echo "::error title=Typecheck::$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' out.txt | head -c 30000)"; exit 1; }
       - name: Lint
-        run: npm run lint
+        shell: bash
+        run: |
+          npm run lint 2>&1 | tee out.txt || { echo "::error title=Lint::$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' out.txt | head -c 30000)"; exit 1; }
       - name: Tests
-        run: npm test -- --ci
+        shell: bash
+        run: |
+          npm test -- --ci 2>&1 | tee out.txt || { echo "::error title=Tests::$(sed ':a;N;$!ba;s/%/%25/g;s/\r//g;s/\n/%0A/g' out.txt | head -c 30000)"; exit 1; }
         env:
           EXPO_PUBLIC_SUPABASE_URL: https://example.supabase.co
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
