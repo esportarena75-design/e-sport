@@ -8,6 +8,7 @@ Proposé par la session cloud après audit (le dev peut réordonner / compléter
 
 ## En cours
 <!-- - [ ] Tâche — session locale|cloud — date -->
+- [ ] Session cloud, nuit du 2026-10-21 (autonome) : CI GitHub Actions → suppression de compte → mot de passe oublié → ErrorBoundary + pages légales → planification des matchs et fin des suspensions → eas.json + README.
 
 ## Fait
 État constaté au commit `f3b67a1` (« Project Arena MVP ») :
