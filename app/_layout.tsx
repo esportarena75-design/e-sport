@@ -1,9 +1,9 @@
 import "../global.css";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { ErrorBoundaryProps, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { colors } from "@/constants/colors";
@@ -47,6 +47,15 @@ function RootNavigator() {
     >
       {/* Ouvert par le lien du mail de réinitialisation : accessible connecté ou non. */}
       <Stack.Screen name="reset-password" />
+      <Stack.Screen
+        name="legal/[doc]"
+        options={{
+          headerShown: true,
+          title: "Informations légales",
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
+        }}
+      />
       <Stack.Protected guard={status === "authenticated"}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -117,6 +126,22 @@ function RootNavigator() {
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
     </Stack>
+  );
+}
+
+// Filet de sécurité : une erreur de rendu affiche cet écran au lieu d'un écran blanc.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  if (__DEV__) console.error(error);
+  return (
+    <View className="flex-1 items-center justify-center gap-3 bg-background px-6">
+      <Text className="text-xl font-semibold text-text">Oups, quelque chose s&apos;est mal passé</Text>
+      <Text className="text-center text-muted">
+        Une erreur inattendue est survenue. Vous pouvez réessayer.
+      </Text>
+      <Pressable onPress={retry} accessibilityRole="button" className="mt-2 rounded-lg bg-primary px-5 py-3">
+        <Text className="font-semibold text-white">Réessayer</Text>
+      </Pressable>
+    </View>
   );
 }
 

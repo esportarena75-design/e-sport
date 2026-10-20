@@ -31,6 +31,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Modification du profil** : écran `app/profile/edit.tsx` (photo depuis la galerie recadrée en carré, suppression de la photo, pseudo, bio), composant `Avatar` (photo ou initiale) sur le profil et la page joueur, une seule photo conservée par joueur.
 - [x] **3 onglets en 1** : les onglets « Mes matchs » et « Classement » sont supprimés, ils vivent dans l'onglet Profil via un sélecteur Profil / Mes matchs / Classement (`app/(tabs)/profile.tsx`, `src/features/profile/sections/`). Mes matchs : « À venir » (date, heure, compte à rebours à la seconde) puis « Historique ». Classement : top 20 + ma position si je suis plus loin.
 - [x] **Mot de passe oublié complet** : le mail contient un lien qui rouvre l'appli sur `app/reset-password.tsx` (nouveau mot de passe + confirmation). Parseur d'URL testé (`src/features/auth/redirect.ts`). ⚠ Réglage Supabase requis : Authentication > URL Configuration > Redirect URLs : ajouter `esportapp://reset-password` (build) et l'URL `exp://…/--/reset-password` affichée par Expo Go.
+- [x] **ErrorBoundary global** (`app/_layout.tsx`) + **pages légales** CGU / confidentialité / règlement (`app/legal/[doc].tsx`, textes dans `src/constants/legal.ts`, liens « Lire le document » sous les cases d'inscription). ⚠ Textes = BROUILLONS à faire valider par un juriste (éditeur, contact RGPD, durées).
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase

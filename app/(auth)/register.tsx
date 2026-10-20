@@ -160,6 +160,7 @@ export default function RegisterScreen() {
               checked={field.value}
               onChange={field.onChange}
               label="J'accepte les conditions générales d'utilisation"
+              readHref="/legal/terms"
               error={errors.termsAccepted?.message}
             />
           )}
@@ -173,6 +174,7 @@ export default function RegisterScreen() {
               checked={field.value}
               onChange={field.onChange}
               label="J'accepte la politique de confidentialité"
+              readHref="/legal/privacy"
               error={errors.privacyAccepted?.message}
             />
           )}
@@ -186,6 +188,7 @@ export default function RegisterScreen() {
               checked={field.value}
               onChange={field.onChange}
               label="J'accepte le règlement des tournois"
+              readHref="/legal/rules"
               error={errors.rulesAccepted?.message}
             />
           )}

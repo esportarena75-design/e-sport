@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Href, Link } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 
 type CheckboxProps = {
@@ -6,9 +7,11 @@ type CheckboxProps = {
   onChange: (value: boolean) => void;
   label: string;
   error?: string;
+  // Lien « Lire » vers le texte (CGU, confidentialité, règlement).
+  readHref?: Href;
 };
 
-export function Checkbox({ checked, onChange, label, error }: CheckboxProps) {
+export function Checkbox({ checked, onChange, label, error, readHref }: CheckboxProps) {
   return (
     <View className="gap-1">
       <Pressable onPress={() => onChange(!checked)} className="flex-row items-center gap-3" hitSlop={8}>
@@ -21,6 +24,13 @@ export function Checkbox({ checked, onChange, label, error }: CheckboxProps) {
         </View>
         <Text className="flex-1 text-sm text-muted">{label}</Text>
       </Pressable>
+      {readHref ? (
+        <Link href={readHref} asChild>
+          <Pressable className="ml-9" hitSlop={8} accessibilityRole="link">
+            <Text className="text-sm text-primary">Lire le document</Text>
+          </Pressable>
+        </Link>
+      ) : null}
       {error ? <Text className="text-sm text-error">{error}</Text> : null}
     </View>
   );
