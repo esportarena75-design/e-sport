@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
 
+import { Avatar } from "@/components/Avatar";
 import { Button } from "@/components/Button";
 import { CircularProgress } from "@/components/CircularProgress";
 import { Screen } from "@/components/Screen";
@@ -58,11 +59,7 @@ export default function ProfileScreen() {
     <Screen>
       <ScrollView contentContainerClassName="gap-6 py-6">
         <View className="flex-row items-center gap-4">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <Text className="text-2xl font-bold text-white">
-              {profile.username.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <Avatar uri={profile.avatar_url} name={profile.username} size={64} />
           <View className="flex-1 gap-1">
             <Text className="text-2xl font-bold text-text">{profile.username}</Text>
             <Text className="text-muted">
@@ -70,6 +67,14 @@ export default function ProfileScreen() {
             </Text>
           </View>
         </View>
+
+        {profile.bio ? <Text className="text-text">{profile.bio}</Text> : null}
+
+        <Button
+          title="Modifier le profil"
+          variant="secondary"
+          onPress={() => router.push("/profile/edit")}
+        />
 
         {stats && stats.matches_played > 0 ? (
           <LinearGradient

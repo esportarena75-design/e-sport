@@ -27,10 +27,12 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Exemptions (byes)** : `generate_bracket` accepte 2 à max_players inscrits ; les premiers inscrits sont exemptés du tour 1 (match créé en `FORFEIT`, un seul joueur, pour ne pas fausser les stats), bracket affiche « Exempt ». Tests : `supabase/tests/byes.sql`, `isBye` dans `bracket.test.ts`.
 - [x] Annulation de tournoi (matchs ouverts annulés par trigger, notifications), clôture des inscriptions (fonction SQL à planifier), preuves de match (insertion réservée aux joueurs du bon match, lecture réparée), sanctions (pas d'auto-sanction, hiérarchie USER < ADMIN < SUPER_ADMIN). Détail dans la migration `20261019010000`.
 - [x] **UI admin** : écran `app/admin/tournament/[id]/manage.tsx` (bouton « Gérer » du dashboard) : forfait d'un joueur sur un match en cours, disqualification, avertissement / suspension / bannissement, motif obligatoire et confirmation, erreurs en français. Le bouton « Annuler » appelle désormais `cancel_tournament`. Les inscriptions affichent « fermées » dès que `registration_end` est passée (`displayStatus` dans `src/utils/time.ts`).
+- [x] **Modification du profil** : écran `app/profile/edit.tsx` (photo depuis la galerie recadrée en carré, suppression de la photo, pseudo, bio), composant `Avatar` (photo ou initiale) sur le profil et la page joueur, une seule photo conservée par joueur.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261020000000_profile_edit.sql` — bucket public `avatars` (2 Mo, jpeg/png/webp) + policies, bio ≤ 160, avatar https, pseudo modifiable tous les 14 jours, et **durcissement : le client ne peut plus modifier `birth_date` ni les dates de consentement** (revoke update + grant sur colonnes). Testée sur Postgres 16 (`supabase/tests/profile.sql`).
 - [ ] `20261019010000_tournament_lifecycle_and_sanctions.sql` — annulation de tournoi (trigger + `cancel_tournament`), `close_expired_registrations()` (à planifier : `select cron.schedule('close-registrations','*/5 * * * *','select public.close_expired_registrations()');`), preuves de match (policies storage corrigées : l'ancienne policy de lecture ne voyait jamais aucun match à cause de la RLS), hiérarchie des sanctions. Testée sur Postgres 16 (`supabase/tests/lifecycle.sql`).
 - [ ] `20261019000000_bracket_byes.sql` — exemptions : un tournoi démarre avec 2 à max_players inscrits. Testée sur Postgres 16 (2 à 16 inscrits).
 - [ ] `20261018000000_fix_advance_winner_and_hardening.sql` — **prioritaire** (sans elle, aucun match ne peut être confirmé). À coller entièrement dans le SQL Editor puis exécuter. Testée sur Postgres 16 avec toutes les migrations précédentes.
@@ -40,12 +42,14 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - _(Session locale : confirmer que les 11 migrations précédentes sont bien appliquées.)_
 
 ## Bloqué
+- **Photo de profil, à vérifier sur appareil** : `allowsEditing` / `aspect` d'expo-image-picker n'ont pas pu être vérifiés dans la doc Expo v57 (consultation refusée) ; ils existent dans les versions précédentes. Tester le choix + recadrage d'une photo sur iOS et Android. Les photos sont en lecture publique (bucket public), cohérent avec `public_profiles`.
 - **Typage des routes** : la nouvelle route `/admin/tournament/[id]/manage` n'existe pas encore dans les types générés (`typedRoutes`). Lancer `npx expo start` une fois (ou `npx expo customize tsconfig.json`) pour les régénérer AVANT `npm run typecheck`, sinon une erreur sur `router.push` est normale.
 - **Suspension sans date de fin** : l'UI applique une suspension indéfinie (`end_date` null) ; rien ne lève la suspension automatiquement. À décider : durée fixe + levée par tâche planifiée ?
 <!-- Ce qui demande une action du dev : clé, décision, test sur appareil… -->
 - L'environnement cloud n'a pas accès au registre npm : `npm run typecheck && npm test && npm run lint` **n'ont pas pu être lancés** sur les commits `a8a5545` et `a09d59f` (seule une vérification de syntaxe a été faite). **Session locale : les lancer avant de merger.**
 
 ## Journal
+- 2026-10-20 — Session cloud : modification du profil (photo, pseudo, bio). Choix : bucket public (l'avatar est déjà exposé par la vue `public_profiles`), 2 Mo, formats jpeg/png/webp (HEIC refusé : message clair), pseudo limité à 1 changement / 14 jours contre l'usurpation. Le revoke update sur `profiles` ferme aussi une faille : un joueur pouvait changer sa date de naissance et ses consentements via l'API.
 - 2026-10-19 — Session cloud : matchs d'exemple de l'accueil RÉACTIVÉS à la demande du dev (`SHOW_DEMO_MATCHES = true`). À repasser à false avant la mise en production.
 - 2026-10-19 — Session cloud : décision byes = les PREMIERS inscrits sont exemptés (récompense l'ancienneté, déterministe), le reste du tirage reste aléatoire. Bye en statut FORFEIT et non COMPLETED car la vue stats ne compte que COMPLETED. Constat : la base impose `entry_fee = 0` et `prize_pool = 0` (check constraints) : tournois gratuits uniquement tant que ces contraintes existent. Matchs d'exemple de l'accueil désactivés (`SHOW_DEMO_MATCHES = false`).
 - 2026-10-19 — Session cloud : 6 matchs d'EXEMPLE dans « Today's Matches » (`src/features/matches/demoMatches.ts`, interrupteur `SHOW_DEMO_MATCHES`) pour remplir l'accueil. **À passer à false avant la mise en production.**

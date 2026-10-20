@@ -2,6 +2,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 
+import { Avatar } from "@/components/Avatar";
 import { CircularProgress } from "@/components/CircularProgress";
 import { Screen } from "@/components/Screen";
 import { colors, gradients } from "@/constants/colors";
@@ -26,11 +27,7 @@ export default function PlayerProfileScreen() {
     <Screen>
       <ScrollView contentContainerClassName="gap-6 py-6">
         <View className="flex-row items-center gap-4">
-          <View className="h-16 w-16 items-center justify-center rounded-full bg-primary">
-            <Text className="text-2xl font-bold text-white">
-              {profile.username.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <Avatar uri={profile.avatar_url} name={profile.username} size={64} />
           <View className="flex-1 gap-1">
             <Text className="text-2xl font-bold text-text">{profile.username}</Text>
             <Text className="text-muted">
