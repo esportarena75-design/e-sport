@@ -8,7 +8,7 @@ Proposé par la session cloud après audit (le dev peut réordonner / compléter
 
 ## En cours
 <!-- - [ ] Tâche — session locale|cloud — date -->
-- [ ] Session cloud, nuit du 2026-10-21 (autonome) : CI GitHub Actions → suppression de compte → mot de passe oublié → ErrorBoundary + pages légales → planification des matchs et fin des suspensions → eas.json + README.
+<!-- Rien en cours : la session cloud de la nuit du 2026-10-21 est terminée. -->
 
 ## Fait
 État constaté au commit `f3b67a1` (« Project Arena MVP ») :
@@ -58,6 +58,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - _(La CI GitHub Actions lance typecheck, lint, jest et les scénarios SQL à chaque push : plus de blocage de ce côté.)_
 
 ## Journal
+- 2026-10-21 — Session cloud (nuit, autonome) : CI GitHub Actions, suppression de compte réelle, mot de passe oublié complet, ErrorBoundary, pages légales (brouillons), planification des matchs, suspensions à durée, titres par forfait, `eas.json`, README. Décisions : le lien de réinitialisation passe par `Linking.createURL('reset-password')` (flux implicit, jetons dans le fragment) ; l'écran `reset-password` est hors des groupes protégés ; les textes légaux sont dans `src/constants/legal.ts` pour qu'un juriste les corrige au même endroit.
 - 2026-10-21 — Session cloud : fusion Mes matchs + Classement dans Profil. Les matchs n'ont pas de date propre (`scheduled_at` n'est jamais renseigné à la génération du bracket) : le compte à rebours vise `scheduled_at`, sinon la date de début du tournoi pour le tour 1 ; les tours suivants affichent « Date à définir ». Piste : fixer `scheduled_at` à la génération, ou ajouter une UI admin pour planifier chaque match.
 - 2026-10-20 — Session cloud : modification du profil (photo, pseudo, bio). Choix : bucket public (l'avatar est déjà exposé par la vue `public_profiles`), 2 Mo, formats jpeg/png/webp (HEIC refusé : message clair), pseudo limité à 1 changement / 14 jours contre l'usurpation. Le revoke update sur `profiles` ferme aussi une faille : un joueur pouvait changer sa date de naissance et ses consentements via l'API.
 - 2026-10-19 — Session cloud : matchs d'exemple de l'accueil RÉACTIVÉS à la demande du dev (`SHOW_DEMO_MATCHES = true`). À repasser à false avant la mise en production.
