@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Image, Text, View } from "react-native";
 
 // Photo de profil, ou initiale du pseudo si elle manque ou ne se charge pas.
@@ -11,8 +11,9 @@ export function Avatar({
   name: string;
   size?: number;
 }) {
-  const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [uri]);
+  // On retient l'URL qui a échoué plutôt qu'un booléen : une nouvelle photo est retentée d'elle-même.
+  const [failedUri, setFailedUri] = useState<string | null>(null);
+  const failed = failedUri === uri;
 
   return (
     <View
@@ -24,7 +25,7 @@ export function Avatar({
           source={{ uri }}
           style={{ width: size, height: size }}
           resizeMode="cover"
-          onError={() => setFailed(true)}
+          onError={() => setFailedUri(uri ?? null)}
           accessibilityIgnoresInvertColors
         />
       ) : (
