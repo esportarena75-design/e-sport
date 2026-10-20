@@ -38,7 +38,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Project Arena a besoin d'accéder à vos photos pour envoyer une preuve de match."
+          "photosPermission": "Project Arena a besoin d'accéder à vos photos pour envoyer votre photo de profil ou une preuve de match."
         }
       ],
       "@react-native-community/datetimepicker",
