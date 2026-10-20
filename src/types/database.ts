@@ -137,6 +137,8 @@ export type Match = {
 export type MatchPublic = Match & {
   player_1_username: string | null;
   player_2_username: string | null;
+  tournament_name: string | null;
+  tournament_start_date: string | null;
 };
 
 export type MatchReport = {

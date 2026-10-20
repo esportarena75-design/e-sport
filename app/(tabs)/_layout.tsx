@@ -74,34 +74,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="matches"
-        options={{
-          title: "Mes matchs",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              name="game-controller"
-              outlineName="game-controller-outline"
-              color={color}
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="ranking"
-        options={{
-          title: "Classement",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              name="podium"
-              outlineName="podium-outline"
-              color={color}
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: "Profil",
