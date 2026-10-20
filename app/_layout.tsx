@@ -45,6 +45,8 @@ function RootNavigator() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
+      {/* Ouvert par le lien du mail de réinitialisation : accessible connecté ou non. */}
+      <Stack.Screen name="reset-password" />
       <Stack.Protected guard={status === "authenticated"}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen

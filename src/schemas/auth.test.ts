@@ -1,4 +1,4 @@
-import { loginSchema, registerSchema } from "@/schemas/auth";
+import { loginSchema, registerSchema, resetPasswordSchema } from "@/schemas/auth";
 
 function eighteenYearsAgo(offsetDays = 0): Date {
   const date = new Date();
@@ -83,5 +83,20 @@ describe("loginSchema", () => {
 
   it("rejects an empty password", () => {
     expect(loginSchema.safeParse({ email: "a@b.com", password: "" }).success).toBe(false);
+  });
+});
+
+describe("resetPasswordSchema", () => {
+  it("accepts matching passwords of 8+ characters", () => {
+    const result = resetPasswordSchema.safeParse({ password: "motdepasse1", confirmPassword: "motdepasse1" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a short password", () => {
+    expect(resetPasswordSchema.safeParse({ password: "court", confirmPassword: "court" }).success).toBe(false);
+  });
+
+  it("rejects mismatching passwords", () => {
+    expect(resetPasswordSchema.safeParse({ password: "motdepasse1", confirmPassword: "motdepasse2" }).success).toBe(false);
   });
 });

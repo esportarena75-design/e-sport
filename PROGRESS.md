@@ -30,6 +30,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **UI admin** : écran `app/admin/tournament/[id]/manage.tsx` (bouton « Gérer » du dashboard) : forfait d'un joueur sur un match en cours, disqualification, avertissement / suspension / bannissement, motif obligatoire et confirmation, erreurs en français. Le bouton « Annuler » appelle désormais `cancel_tournament`. Les inscriptions affichent « fermées » dès que `registration_end` est passée (`displayStatus` dans `src/utils/time.ts`).
 - [x] **Modification du profil** : écran `app/profile/edit.tsx` (photo depuis la galerie recadrée en carré, suppression de la photo, pseudo, bio), composant `Avatar` (photo ou initiale) sur le profil et la page joueur, une seule photo conservée par joueur.
 - [x] **3 onglets en 1** : les onglets « Mes matchs » et « Classement » sont supprimés, ils vivent dans l'onglet Profil via un sélecteur Profil / Mes matchs / Classement (`app/(tabs)/profile.tsx`, `src/features/profile/sections/`). Mes matchs : « À venir » (date, heure, compte à rebours à la seconde) puis « Historique ». Classement : top 20 + ma position si je suis plus loin.
+- [x] **Mot de passe oublié complet** : le mail contient un lien qui rouvre l'appli sur `app/reset-password.tsx` (nouveau mot de passe + confirmation). Parseur d'URL testé (`src/features/auth/redirect.ts`). ⚠ Réglage Supabase requis : Authentication > URL Configuration > Redirect URLs : ajouter `esportapp://reset-password` (build) et l'URL `exp://…/--/reset-password` affichée par Expo Go.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
@@ -50,7 +51,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - **Typage des routes** : la nouvelle route `/admin/tournament/[id]/manage` n'existe pas encore dans les types générés (`typedRoutes`). Lancer `npx expo start` une fois (ou `npx expo customize tsconfig.json`) pour les régénérer AVANT `npm run typecheck`, sinon une erreur sur `router.push` est normale.
 - **Suspension sans date de fin** : l'UI applique une suspension indéfinie (`end_date` null) ; rien ne lève la suspension automatiquement. À décider : durée fixe + levée par tâche planifiée ?
 <!-- Ce qui demande une action du dev : clé, décision, test sur appareil… -->
-- L'environnement cloud n'a pas accès au registre npm : `npm run typecheck && npm test && npm run lint` **n'ont pas pu être lancés** sur les commits `a8a5545` et `a09d59f` (seule une vérification de syntaxe a été faite). **Session locale : les lancer avant de merger.**
+- _(La CI GitHub Actions lance typecheck, lint, jest et les scénarios SQL à chaque push : plus de blocage de ce côté.)_
 
 ## Journal
 - 2026-10-21 — Session cloud : fusion Mes matchs + Classement dans Profil. Les matchs n'ont pas de date propre (`scheduled_at` n'est jamais renseigné à la génération du bracket) : le compte à rebours vise `scheduled_at`, sinon la date de début du tournoi pour le tour 1 ; les tours suivants affichent « Date à définir ». Piste : fixer `scheduled_at` à la génération, ou ajouter une UI admin pour planifier chaque match.

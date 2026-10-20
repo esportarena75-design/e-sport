@@ -1,3 +1,5 @@
+import * as Linking from "expo-linking";
+
 import { supabase } from "@/lib/supabase";
 import type { LoginInput, RegisterInput } from "@/schemas/auth";
 import type { Profile } from "@/types/database";
@@ -33,7 +35,24 @@ export async function signOut() {
 }
 
 export async function resetPassword(email: string) {
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  // Le lien du mail rouvre l'appli sur l'écran « reset-password » (schéma esportapp:// en build,
+  // exp:// dans Expo Go). Cette URL doit figurer dans Supabase > Authentication > URL Configuration.
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: Linking.createURL("reset-password"),
+  });
+  if (error) throw error;
+}
+
+export async function startRecoverySession(accessToken: string, refreshToken: string) {
+  const { error } = await supabase.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  });
+  if (error) throw error;
+}
+
+export async function updatePassword(password: string) {
+  const { error } = await supabase.auth.updateUser({ password });
   if (error) throw error;
 }
 
