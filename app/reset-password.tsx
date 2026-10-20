@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
@@ -13,39 +13,44 @@ import { startRecoverySession, updatePassword } from "@/features/auth/api";
 import { parseAuthRedirect } from "@/features/auth/redirect";
 import { ResetPasswordInput, resetPasswordSchema } from "@/schemas/auth";
 
-type LinkState = "waiting" | "ready" | "invalid";
+type SessionState = "pending" | "ok" | "failed";
 
 // Écran ouvert par le lien du mail « mot de passe oublié ». Il est volontairement placé hors des
 // groupes protégés : la session de récupération rend l'utilisateur « connecté » le temps du changement.
 export default function ResetPasswordScreen() {
   const router = useRouter();
   const url = Linking.useURL();
-  const [linkState, setLinkState] = useState<LinkState>("waiting");
+  const [sessionState, setSessionState] = useState<SessionState>("pending");
+  const [timedOut, setTimedOut] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const parsed = useMemo(() => parseAuthRedirect(url), [url]);
+  const tokens = parsed?.kind === "tokens" ? parsed : null;
+  const accessToken = tokens?.accessToken;
+  const refreshToken = tokens?.refreshToken;
+
   useEffect(() => {
-    if (!url) return;
-    const parsed = parseAuthRedirect(url);
-    if (!parsed || parsed.kind === "error") {
-      setLinkState("invalid");
-      return;
-    }
+    if (!accessToken || !refreshToken) return;
     let cancelled = false;
-    startRecoverySession(parsed.accessToken, parsed.refreshToken)
-      .then(() => !cancelled && setLinkState("ready"))
-      .catch(() => !cancelled && setLinkState("invalid"));
+    startRecoverySession(accessToken, refreshToken)
+      .then(() => !cancelled && setSessionState("ok"))
+      .catch(() => !cancelled && setSessionState("failed"));
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [accessToken, refreshToken]);
 
   // Sans URL après un court délai, l'écran a été ouvert sans passer par le mail.
   useEffect(() => {
-    if (url) return;
-    const timer = setTimeout(() => setLinkState((s) => (s === "waiting" ? "invalid" : s)), 2500);
+    const timer = setTimeout(() => setTimedOut(true), 2500);
     return () => clearTimeout(timer);
-  }, [url]);
+  }, []);
+
+  let linkState: "waiting" | "ready" | "invalid";
+  if (url && !tokens) linkState = "invalid";
+  else if (tokens) linkState = sessionState === "ok" ? "ready" : sessionState === "failed" ? "invalid" : "waiting";
+  else linkState = timedOut ? "invalid" : "waiting";
 
   const {
     control,
