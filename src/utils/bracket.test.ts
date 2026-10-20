@@ -1,4 +1,4 @@
-import { roundLabel } from "@/utils/bracket";
+import { isBye, roundLabel } from "@/utils/bracket";
 
 describe("roundLabel", () => {
   it("labels the last round as the final", () => {
@@ -19,5 +19,22 @@ describe("roundLabel", () => {
 
   it("labels a single-round (2-player) bracket as the final", () => {
     expect(roundLabel(1, 1)).toBe("Finale");
+  });
+});
+
+describe("isBye", () => {
+  const base = { status: "FORFEIT", player_1_id: "a", player_2_id: null, winner_id: "a" };
+
+  it("detects a bye (single player, closed by forfeit)", () => {
+    expect(isBye(base)).toBe(true);
+    expect(isBye({ ...base, player_1_id: null, player_2_id: "b", winner_id: "b" })).toBe(true);
+  });
+
+  it("ignores a real forfeit between two players", () => {
+    expect(isBye({ ...base, player_2_id: "b" })).toBe(false);
+  });
+
+  it("ignores matches still to play", () => {
+    expect(isBye({ ...base, status: "READY", winner_id: null })).toBe(false);
   });
 });

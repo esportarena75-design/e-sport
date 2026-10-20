@@ -137,6 +137,8 @@ export type Match = {
 export type MatchPublic = Match & {
   player_1_username: string | null;
   player_2_username: string | null;
+  tournament_name: string | null;
+  tournament_start_date: string | null;
 };
 
 export type MatchReport = {
@@ -223,5 +225,19 @@ export type Sanction = {
   created_by: string | null;
   start_date: string;
   end_date: string | null;
+  created_at: string;
+};
+
+export type NewsItem = {
+  id: string;
+  title: string;
+  summary: string;
+  tag: string | null;
+  source_name: string;
+  source_url: string;
+  image_url: string | null;
+  published_at: string;
+  is_published: boolean;
+  created_by: string | null;
   created_at: string;
 };

@@ -4,14 +4,16 @@ import { ReactNode, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "react-native";
 
 import { MatchStatusBadge } from "@/components/MatchStatusBadge";
+import { NewsCard } from "@/components/NewsCard";
 import { Screen } from "@/components/Screen";
-import { TournamentCard } from "@/components/TournamentCard";
 import { colors } from "@/constants/colors";
 import { useProfile } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { useGames } from "@/features/game-accounts/hooks";
+import { DEMO_MATCHES, SHOW_DEMO_MATCHES, type DemoMatch } from "@/features/matches/demoMatches";
 import { useMyMatches } from "@/features/matches/hooks";
-import { useTournaments } from "@/features/tournaments/hooks";
+import { useLatestNews } from "@/features/news/hooks";
+
 import type { Game, MatchPublic } from "@/types/database";
 
 const ACTIVE_MATCH_STATUSES = ["READY", "IN_PROGRESS", "AWAITING_CONFIRMATION"];
@@ -22,13 +24,17 @@ export default function HomeScreen() {
   const { data: profile } = useProfile(myId);
   const { data: games } = useGames();
   const { data: myMatches, isLoading: loadingMatches } = useMyMatches(myId);
-  const { data: newsPages, isLoading: loadingNews } = useTournaments({
-    status: "REGISTRATION_OPEN",
-  });
+ 
+  const {
+    data: esportNews,
+    isLoading: loadingEsportNews,
+    isError: esportNewsError,
+    refetch: refetchEsportNews,
+  } = useLatestNews();
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
   const todaysMatches = (myMatches ?? []).filter((m) => ACTIVE_MATCH_STATUSES.includes(m.status));
-  const news = (newsPages?.pages.flat() ?? []).slice(0, 6);
+  
 
   return (
     <Screen>
@@ -83,12 +89,15 @@ export default function HomeScreen() {
         <Section title="Today's Matches">
           {loadingMatches ? (
             <ActivityIndicator color={colors.primary} />
-          ) : todaysMatches.length > 0 ? (
+          ) : todaysMatches.length > 0 || SHOW_DEMO_MATCHES ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
               <View className="flex-row gap-3">
                 {todaysMatches.map((match) => (
                   <MatchCarouselCard key={match.id} match={match} myId={myId} />
                 ))}
+                {SHOW_DEMO_MATCHES
+                  ? DEMO_MATCHES.map((match) => <DemoMatchCard key={match.id} match={match} />)
+                  : null}
               </View>
             </ScrollView>
           ) : (
@@ -97,20 +106,26 @@ export default function HomeScreen() {
         </Section>
 
         <Section title="News">
-          {loadingNews ? (
+          
+
+          {loadingEsportNews ? (
             <ActivityIndicator color={colors.primary} />
-          ) : news.length > 0 ? (
+          ) : esportNewsError ? (
+            <Pressable onPress={() => refetchEsportNews()} accessibilityRole="button">
+              <Text className="text-muted">
+                Impossible de charger les actus. <Text className="text-primary">Réessayer</Text>
+              </Text>
+            </Pressable>
+          ) : esportNews && esportNews.length > 0 ? (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="-mx-4 px-4">
               <View className="flex-row gap-3">
-                {news.map((tournament) => (
-                  <View key={tournament.id} className="w-72">
-                    <TournamentCard tournament={tournament} />
-                  </View>
+                {esportNews.map((item) => (
+                  <NewsCard key={item.id} news={item} />
                 ))}
               </View>
             </ScrollView>
           ) : (
-            <Text className="text-muted">Aucun tournoi disponible pour le moment.</Text>
+            <Text className="text-muted">Aucune actu pour le moment.</Text>
           )}
         </Section>
       </ScrollView>
@@ -130,7 +145,7 @@ function GameCircle({
   return (
     <Pressable onPress={onPress} className="items-center gap-1.5">
       <View
-        className={`h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
+        className={`h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 bg-surface-alt ${
           selected ? "border-primary" : "border-border"
         }`}
       >
@@ -139,13 +154,13 @@ function GameCircle({
         ) : (
           <Ionicons
             name="game-controller"
-            size={26}
+            size={32}
             color={selected ? colors.primary : colors.muted}
           />
         )}
       </View>
       <Text
-        className={`max-w-[70px] text-center text-xs ${selected ? "text-text" : "text-muted"}`}
+        className={`max-w-[84px] text-center text-sm ${selected ? "text-text" : "text-muted"}`}
         numberOfLines={1}
       >
         {game.name}
@@ -167,7 +182,7 @@ function MatchCarouselCard({
   return (
     <Pressable
       onPress={() => router.push(`/match/${match.id}`)}
-      className="gap-3 bg-surface p-4 border border-border rounded-2xl w-56"
+      className="gap-4 bg-surface p-5 border border-border rounded-2xl w-80"
     >
       <View className="flex-row justify-between items-center">
         <Text className="font-medium text-muted text-xs">Round {match.round}</Text>
@@ -177,6 +192,40 @@ function MatchCarouselCard({
         vs {opponentName ?? "À déterminer"}
       </Text>
     </Pressable>
+  );
+}
+
+function DemoMatchCard({ match }: { match: DemoMatch }) {
+  return (
+    <View
+      className="gap-4 bg-surface p-5 border border-border rounded-2xl w-80"
+      accessibilityLabel={`Exemple : ${match.game}, ${match.tournament}, contre ${match.opponent}`}
+    >
+      <View className="flex-row justify-between items-center">
+        <View className="flex-row flex-1 items-center gap-2 pr-2">
+          <Ionicons name="game-controller" size={20} color={colors.primary} />
+          <Text className="flex-1 font-medium text-muted text-sm" numberOfLines={1}>
+            {match.game}
+          </Text>
+        </View>
+        <MatchStatusBadge status={match.status} />
+      </View>
+      <View className="gap-0.5">
+        <Text className="font-bold text-text text-xl" numberOfLines={1}>
+          vs {match.opponent}
+        </Text>
+        <Text className="text-muted text-sm" numberOfLines={1}>
+          {match.tournament} · {match.round}
+        </Text>
+      </View>
+      <View className="flex-row justify-between items-center pt-2 border-border border-t">
+        <View className="flex-row items-center gap-1.5">
+          <Ionicons name="time-outline" size={16} color={colors.muted} />
+          <Text className="text-muted text-sm">{match.time}</Text>
+        </View>
+        <Text className="text-muted text-sm italic">Exemple</Text>
+      </View>
+    </View>
   );
 }
 

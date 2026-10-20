@@ -21,3 +21,9 @@ done
 
 echo "=== Scénario (les lignes 'doit echouer' doivent afficher une ERROR explicite)"
 psql -d arena_test -f "$DIR/scenario.sql" 2>&1 | grep -E "TEST|doit|correcte|ERROR|COMPLETED|FORFEIT|DISPUTED|READY|SCHEDULED| t$| f$"
+echo "=== Exemptions (byes)"
+psql -d arena_test -f "$DIR/byes.sql" 2>&1 | grep -E "n=|doit|ERROR|Not enough"
+echo "=== Cycle de vie, preuves, sanctions"
+psql -d arena_test -f "$DIR/lifecycle.sql" 2>&1 | grep -v "^$" | sed "s#psql:[^ ]*lifecycle.sql:[0-9]*: ##"
+echo "=== Profil"
+psql -d arena_test -f "$DIR/profile.sql" 2>&1 | grep -v "^$" | grep -v "as_user\|^---------\|^(1 row)\|^SET\|^RESET\|^GRANT\|set_config\|service_role\|^ *|" | sed "s#psql:[^ ]*profile.sql:[0-9]*: ##"

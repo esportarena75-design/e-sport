@@ -7,9 +7,15 @@ import { Screen } from "@/components/Screen";
 import { StatusBadge } from "@/components/StatusBadge";
 import { colors } from "@/constants/colors";
 import { toFriendlyAdminError } from "@/features/admin/errors";
-import { useAdminTournaments, useOpenDisputes, useUpdateTournamentStatus } from "@/features/admin/hooks";
+import {
+  useAdminTournaments,
+  useCancelTournament,
+  useOpenDisputes,
+  useUpdateTournamentStatus,
+} from "@/features/admin/hooks";
 import { useGenerateBracket } from "@/features/bracket/hooks";
 import type { TournamentPublic } from "@/types/database";
+import { displayStatus } from "@/utils/time";
 
 export default function AdminDashboardScreen() {
   return (
@@ -63,6 +69,7 @@ function AdminDashboardContent() {
 
 function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
   const updateStatus = useUpdateTournamentStatus();
+  const cancelTournament = useCancelTournament();
   const generateBracket = useGenerateBracket(tournament.id);
 
   const showError = (error: unknown) => Alert.alert("Erreur", toFriendlyAdminError(error));
@@ -72,15 +79,19 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
   };
 
   const handleCancel = () => {
-    Alert.alert("Annuler le tournoi", "Confirmer l'annulation ?", [
-      { text: "Non", style: "cancel" },
-      {
-        text: "Annuler le tournoi",
-        style: "destructive",
-        onPress: () =>
-          updateStatus.mutate({ id: tournament.id, status: "CANCELLED" }, { onError: showError }),
-      },
-    ]);
+    Alert.alert(
+      "Annuler le tournoi",
+      "Les matchs en cours seront annulés et les inscrits prévenus. Confirmer ?",
+      [
+        { text: "Non", style: "cancel" },
+        {
+          text: "Annuler le tournoi",
+          style: "destructive",
+          onPress: () =>
+            cancelTournament.mutate({ tournamentId: tournament.id }, { onError: showError }),
+        },
+      ],
+    );
   };
 
   const handleGenerateBracket = async () => {
@@ -98,7 +109,7 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
     >
       <View className="flex-row items-center justify-between gap-2">
         <Text className="flex-1 font-semibold text-text">{tournament.name}</Text>
-        <StatusBadge status={tournament.status} />
+        <StatusBadge status={displayStatus(tournament)} />
       </View>
       <Text className="text-muted">
         {tournament.participant_count} / {tournament.max_players} joueurs
@@ -116,8 +127,18 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
             onPress={handleGenerateBracket}
           />
         ) : null}
+        <Button
+          title="Gérer"
+          variant="secondary"
+          onPress={() => router.push(`/admin/tournament/${tournament.id}/manage`)}
+        />
         {tournament.status !== "CANCELLED" && tournament.status !== "COMPLETED" ? (
-          <Button title="Annuler" variant="secondary" onPress={handleCancel} />
+          <Button
+            title="Annuler"
+            variant="secondary"
+            loading={cancelTournament.isPending}
+            onPress={handleCancel}
+          />
         ) : null}
       </View>
     </Pressable>

@@ -11,6 +11,10 @@ Elles ne partagent aucune mémoire : **ce repo est leur seule mémoire commune.*
 2. Lire `PROGRESS.md` en entier avant de toucher au code.
 3. Prendre la première tâche « À faire » non réservée, et la marquer « En cours (session X) ».
 
+## Identité des commits
+Les commits sont signés au nom du dev (auteur : `wessame92 <wessame-amil@hotmail.com>`), avec Claude en co-auteur (ligne `Co-Authored-By`). À configurer au début de chaque session cloud (le conteneur est éphémère), uniquement pour ce dépôt :
+`git config user.name "wessame92" && git config user.email "wessame-amil@hotmail.com"`
+
 ## Pendant le travail
 - Une tâche = un ou plusieurs commits clairs, puis **push immédiat**. Rien ne doit rester non poussé.
 - Branche de travail commune : `claude/finition`. Jamais de push direct sur `main`.

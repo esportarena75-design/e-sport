@@ -1,9 +1,15 @@
 import { toFriendlyAdminError } from "@/features/admin/errors";
 
 describe("toFriendlyAdminError", () => {
-  it("explains the power-of-two bracket constraint", () => {
-    const error = new Error("Participant count must be a power of two (byes are not supported yet)");
-    expect(toFriendlyAdminError(error)).toContain("2, 4, 8, 16, 32 ou 64");
+  it("maps an overfull tournament", () => {
+    expect(toFriendlyAdminError(new Error("Too many participants for this tournament's bracket size"))).toBe(
+      "Il y a plus d'inscrits que de places dans ce tournoi.",
+    );
+  });
+
+  it("maps sanction hierarchy errors", () => {
+    expect(toFriendlyAdminError(new Error("You cannot sanction yourself"))).toContain("vous-même");
+    expect(toFriendlyAdminError(new Error("Insufficient privileges to sanction this user"))).toContain("rang");
   });
 
   it("maps an already-handled dispute", () => {

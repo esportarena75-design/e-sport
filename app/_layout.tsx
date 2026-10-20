@@ -57,6 +57,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="profile/edit"
+          options={{
+            headerShown: true,
+            title: "Modifier le profil",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="notifications"
           options={{
             headerShown: true,
@@ -79,6 +88,15 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Créer un tournoi",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
+          name="admin/tournament/[id]/manage"
+          options={{
+            headerShown: true,
+            title: "Gérer le tournoi",
             headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
           }}
