@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Dispute, Tournament, TournamentPublic } from "@/types/database";
+import type { Dispute, Sanction, Tournament, TournamentPublic } from "@/types/database";
 
 export async function listAllTournamentsForAdmin(): Promise<TournamentPublic[]> {
   const { data, error } = await supabase
@@ -126,4 +126,58 @@ export async function scheduleMatch(input: { matchId: string; scheduledAt: Date 
     p_scheduled_at: input.scheduledAt.toISOString(),
   });
   if (error) throw error;
+}
+
+export type AdminUser = {
+  id: string;
+  username: string;
+  role: string;
+  status: string;
+  created_at: string;
+};
+
+export async function searchUsers(query: string): Promise<AdminUser[]> {
+  const { data, error } = await supabase.rpc("admin_search_users", { p_query: query });
+  if (error) throw error;
+  return (data ?? []) as AdminUser[];
+}
+
+export async function getAdminUser(userId: string): Promise<AdminUser | null> {
+  const { data, error } = await supabase.rpc("admin_get_user", { p_user_id: userId });
+  if (error) throw error;
+  return ((data ?? []) as AdminUser[])[0] ?? null;
+}
+
+export async function listUserSanctions(userId: string): Promise<Sanction[]> {
+  const { data, error } = await supabase
+    .from("sanctions")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+export async function liftSanction(input: { userId: string; reason: string }) {
+  const { error } = await supabase.rpc("admin_lift_sanction", {
+    p_user_id: input.userId,
+    p_reason: input.reason,
+  });
+  if (error) throw error;
+}
+
+export type AdminLog = {
+  id: string;
+  created_at: string;
+  admin_username: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string | null;
+  details: Record<string, unknown> | null;
+};
+
+export async function listAdminLogs(limit = 50): Promise<AdminLog[]> {
+  const { data, error } = await supabase.rpc("admin_list_logs", { p_limit: limit });
+  if (error) throw error;
+  return (data ?? []) as AdminLog[];
 }

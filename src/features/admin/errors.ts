@@ -51,6 +51,15 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Invalid end date")) {
     return "La date de fin de suspension est invalide.";
   }
+  if (message.includes("A reason is required")) {
+    return "Saisissez un motif (3 caractères minimum).";
+  }
+  if (message.includes("User has no active sanction")) {
+    return "Ce joueur n'a aucune suspension ni aucun bannissement en cours.";
+  }
+  if (message.includes("User not found")) {
+    return "Joueur introuvable.";
+  }
   if (message.includes("already closed")) {
     return "Ce match est déjà terminé.";
   }

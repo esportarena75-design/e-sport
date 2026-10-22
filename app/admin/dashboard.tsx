@@ -54,6 +54,19 @@ function AdminDashboardContent() {
             <Text className="text-warning">{disputes?.length ?? 0}</Text>
           </Pressable>
         </Link>
+
+        <View className="flex-row gap-3">
+          <Link href="/admin/users" asChild>
+            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
+              <Text className="text-text">Joueurs</Text>
+            </Pressable>
+          </Link>
+          <Link href="/admin/logs" asChild>
+            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
+              <Text className="text-text">Journal</Text>
+            </Pressable>
+          </Link>
+        </View>
       </View>
 
       <FlatList

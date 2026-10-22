@@ -6,10 +6,15 @@ import {
   createTournament,
   disqualifyParticipant,
   forfeitMatch,
+  getAdminUser,
+  liftSanction,
+  listAdminLogs,
+  listUserSanctions,
   listAllTournamentsForAdmin,
   listOpenDisputes,
   resolveDispute,
   scheduleMatch,
+  searchUsers,
   updateTournamentStatus,
 } from "@/features/admin/api";
 
@@ -97,4 +102,52 @@ export function useApplySanction() {
 export function useScheduleMatch(tournamentId: string) {
   const invalidate = useInvalidateAfterAdminAction(tournamentId);
   return useMutation({ mutationFn: scheduleMatch, onSuccess: invalidate });
+}
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: ["admin-users", query],
+    queryFn: () => searchUsers(query),
+    enabled: query.trim().length >= 2,
+  });
+}
+
+export function useAdminUser(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["admin-user", userId],
+    queryFn: () => getAdminUser(userId!),
+    enabled: !!userId,
+  });
+}
+
+export function useUserSanctions(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["admin-user-sanctions", userId],
+    queryFn: () => listUserSanctions(userId!),
+    enabled: !!userId,
+  });
+}
+
+function useInvalidateAfterUserAction(userId: string) {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-user", userId] });
+    queryClient.invalidateQueries({ queryKey: ["admin-user-sanctions", userId] });
+    queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-logs"] });
+  };
+}
+
+export function useLiftSanction(userId: string) {
+  const invalidate = useInvalidateAfterUserAction(userId);
+  return useMutation({ mutationFn: liftSanction, onSuccess: invalidate });
+}
+
+export function useApplySanctionToUser(userId: string) {
+  const invalidate = useInvalidateAfterUserAction(userId);
+  return useMutation({ mutationFn: applySanction, onSuccess: invalidate });
+}
+
+export function useAdminLogs() {
+  return useQuery({ queryKey: ["admin-logs"], queryFn: () => listAdminLogs(100) });
 }

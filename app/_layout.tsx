@@ -113,6 +113,33 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="admin/users"
+          options={{
+            headerShown: true,
+            title: "Joueurs",
+            headerStyle: {{ backgroundColor: colors.surface }},
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
+          name="admin/user/[id]"
+          options={{
+            headerShown: true,
+            title: "Joueur",
+            headerStyle: {{ backgroundColor: colors.surface }},
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
+          name="admin/logs"
+          options={{
+            headerShown: true,
+            title: "Journal admin",
+            headerStyle: {{ backgroundColor: colors.surface }},
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="admin/disputes"
           options={{
             headerShown: true,

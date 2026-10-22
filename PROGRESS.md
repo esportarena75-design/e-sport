@@ -35,10 +35,12 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
 - [x] Liste des tournois : recherche avec délai (plus de requête à chaque frappe), jokers `%` `_` neutralisés, tirer pour rafraîchir.
 - [x] Notifications : « Tout marquer comme lu » et écran d'erreur avec réessai.
+- [x] **Espace admin : joueurs et journal** — écran Joueurs (recherche par pseudo, fiche avec historique des sanctions, sanctionner, lever une suspension/un ban) et écran Journal (actions admin lisibles). Reste à faire : modifier un tournoi, gérer les actus, vérifier l'affichage des preuves dans les litiges.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261023000000_admin_users_and_logs.sql` — `admin_search_users`, `admin_get_user`, `admin_lift_sanction`, `admin_list_logs` (admin uniquement, jamais d'e-mail). Testée (`supabase/tests/admin_users.sql`).
 - [ ] `20261022010000_tournaments_won_forfeit_final.sql` — une finale gagnée par forfait compte comme titre dans `player_stats`. Testée.
 - [ ] `20261022000000_match_scheduling_and_suspensions.sql` — `admin_schedule_match` (planifier un match, joueurs notifiés), `apply_sanction` refuse une date de fin passée, `lift_expired_suspensions()` à planifier : `select cron.schedule('lift-suspensions','*/10 * * * *','select public.lift_expired_suspensions()');`. Testée (`supabase/tests/schedule.sql`).
 - [ ] `20261021010000_delete_own_account.sql` — vraie suppression de compte (anonymisation du profil, e-mail/mot de passe effacés, compte bloqué, forfait des matchs en cours). Testée (`supabase/tests/account.sql`). ⚠ écrit dans `auth.users` / `auth.identities` / `auth.sessions` : à tester une fois sur un compte jetable dans Supabase.
