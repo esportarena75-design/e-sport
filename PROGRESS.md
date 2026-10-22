@@ -33,6 +33,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Mot de passe oublié complet** : le mail contient un lien qui rouvre l'appli sur `app/reset-password.tsx` (nouveau mot de passe + confirmation). Parseur d'URL testé (`src/features/auth/redirect.ts`). ⚠ Réglage Supabase requis : Authentication > URL Configuration > Redirect URLs : ajouter `esportapp://reset-password` (build) et l'URL `exp://…/--/reset-password` affichée par Expo Go.
 - [x] **ErrorBoundary global** (`app/_layout.tsx`) + **pages légales** CGU / confidentialité / règlement (`app/legal/[doc].tsx`, textes dans `src/constants/legal.ts`, liens « Lire le document » sous les cases d'inscription). ⚠ Textes = BROUILLONS à faire valider par un juriste (éditeur, contact RGPD, durées).
 - [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
+- [x] Liste des tournois : recherche avec délai (plus de requête à chaque frappe), jokers `%` `_` neutralisés, tirer pour rafraîchir.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase

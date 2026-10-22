@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { toLikePattern } from "@/utils/search";
 import type { TournamentParticipantPublic, TournamentPublic, TournamentStatus } from "@/types/database";
 
 export const TOURNAMENTS_PAGE_SIZE = 10;
@@ -17,7 +18,7 @@ export async function listTournaments(
   let query = supabase.from("tournaments_public").select("*").order("start_date", { ascending: true });
 
   if (filters.search) {
-    query = query.ilike("name", `%${filters.search}%`);
+    query = query.ilike("name", toLikePattern(filters.search));
   }
   if (filters.gameId) {
     query = query.eq("game_id", filters.gameId);

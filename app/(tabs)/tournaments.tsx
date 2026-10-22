@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
 
 import { ChipSelect } from "@/components/ChipSelect";
 import { EmptyState } from "@/components/EmptyState";
@@ -9,6 +9,7 @@ import { LoadingState } from "@/components/LoadingState";
 import { Screen } from "@/components/Screen";
 import { TournamentCard } from "@/components/TournamentCard";
 import { colors } from "@/constants/colors";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useGames, usePlatforms } from "@/features/game-accounts/hooks";
 import { useTournaments } from "@/features/tournaments/hooks";
 import type { TournamentStatus } from "@/types/database";
@@ -26,21 +27,31 @@ export default function TournamentsScreen() {
   const [platformId, setPlatformId] = useState("");
   const [status, setStatus] = useState("");
 
+  const debouncedSearch = useDebouncedValue(search);
+
   const { data: games } = useGames();
   const { data: platforms } = usePlatforms();
 
   const filters = useMemo(
     () => ({
-      search: search || undefined,
+      search: debouncedSearch.trim() || undefined,
       gameId: gameId || undefined,
       platformId: platformId || undefined,
       status: (status || undefined) as TournamentStatus | undefined,
     }),
-    [search, gameId, platformId, status],
+    [debouncedSearch, gameId, platformId, status],
   );
 
-  const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useTournaments(filters);
+  const {
+    data,
+    isLoading,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isRefetching,
+  } = useTournaments(filters);
   const tournaments = data?.pages.flat() ?? [];
 
   const gameOptions = useMemo(
@@ -80,6 +91,13 @@ export default function TournamentsScreen() {
           keyExtractor={(item) => item.id}
           contentContainerClassName="gap-3 pb-6"
           renderItem={({ item }) => <TournamentCard tournament={item} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching && !isFetchingNextPage}
+              onRefresh={() => refetch()}
+              tintColor={colors.primary}
+            />
+          }
           onEndReached={() => hasNextPage && fetchNextPage()}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={<EmptyState message="Aucun tournoi trouvé." />}
