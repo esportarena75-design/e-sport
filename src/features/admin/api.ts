@@ -181,3 +181,24 @@ export async function listAdminLogs(limit = 50): Promise<AdminLog[]> {
   if (error) throw error;
   return (data ?? []) as AdminLog[];
 }
+
+export async function updateTournament(input: {
+  tournamentId: string;
+  name: string;
+  description: string;
+  rules: string;
+  maxPlayers: number;
+  registrationEnd: Date;
+  startDate: Date;
+}) {
+  const { error } = await supabase.rpc("admin_update_tournament", {
+    p_tournament_id: input.tournamentId,
+    p_name: input.name,
+    p_description: input.description,
+    p_rules: input.rules,
+    p_max_players: input.maxPlayers,
+    p_registration_end: input.registrationEnd.toISOString(),
+    p_start_date: input.startDate.toISOString(),
+  });
+  if (error) throw error;
+}

@@ -113,6 +113,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="admin/tournament/[id]/edit"
+          options={{
+            headerShown: true,
+            title: "Modifier le tournoi",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="admin/users"
           options={{
             headerShown: true,

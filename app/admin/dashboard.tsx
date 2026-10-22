@@ -140,6 +140,13 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
             onPress={handleGenerateBracket}
           />
         ) : null}
+        {["DRAFT", "REGISTRATION_OPEN", "REGISTRATION_CLOSED"].includes(tournament.status) ? (
+          <Button
+            title="Modifier"
+            variant="secondary"
+            onPress={() => router.push(`/admin/tournament/${tournament.id}/edit`)}
+          />
+        ) : null}
         <Button
           title="Gérer"
           variant="secondary"

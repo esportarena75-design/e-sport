@@ -15,6 +15,7 @@ import {
   resolveDispute,
   scheduleMatch,
   searchUsers,
+  updateTournament,
   updateTournamentStatus,
 } from "@/features/admin/api";
 
@@ -150,4 +151,9 @@ export function useApplySanctionToUser(userId: string) {
 
 export function useAdminLogs() {
   return useQuery({ queryKey: ["admin-logs"], queryFn: () => listAdminLogs(100) });
+}
+
+export function useUpdateTournament(tournamentId: string) {
+  const invalidate = useInvalidateAfterAdminAction(tournamentId);
+  return useMutation({ mutationFn: updateTournament, onSuccess: invalidate });
 }

@@ -51,6 +51,21 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Invalid end date")) {
     return "La date de fin de suspension est invalide.";
   }
+  if (message.includes("Tournament can no longer be edited")) {
+    return "Ce tournoi ne peut plus être modifié (bracket généré, terminé ou annulé).";
+  }
+  if (message.includes("below the number of registered players")) {
+    return "Il y a déjà plus d'inscrits que cette taille de tournoi.";
+  }
+  if (message.includes("Tournament must start after registration ends")) {
+    return "Le tournoi doit démarrer après la fin des inscriptions.";
+  }
+  if (message.includes("Registration end must be after registration start")) {
+    return "La fin des inscriptions doit être après leur début.";
+  }
+  if (message.includes("Invalid tournament name")) {
+    return "Le nom doit faire entre 3 et 80 caractères.";
+  }
   if (message.includes("A reason is required")) {
     return "Saisissez un motif (3 caractères minimum).";
   }

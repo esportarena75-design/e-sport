@@ -29,6 +29,11 @@ describe("toFriendlyAdminError", () => {
     expect(toFriendlyAdminError(new Error("Match can no longer be scheduled"))).toContain("planifié");
   });
 
+  it("maps tournament edit errors", () => {
+    expect(toFriendlyAdminError(new Error("Tournament can no longer be edited"))).toContain("modifié");
+    expect(toFriendlyAdminError(new Error("Max players is below the number of registered players"))).toContain("inscrits");
+  });
+
   it("falls back to a generic message", () => {
     expect(toFriendlyAdminError("boom")).toBe("Une erreur est survenue. Réessayez.");
   });

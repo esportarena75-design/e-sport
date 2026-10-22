@@ -1,4 +1,4 @@
-import { createTournamentSchema } from "@/schemas/tournament";
+import { createTournamentSchema, editTournamentSchema } from "@/schemas/tournament";
 
 function validInput(overrides: Partial<Record<string, unknown>> = {}) {
   const registrationStart = new Date("2026-06-01T10:00:00Z");
@@ -48,5 +48,27 @@ describe("createTournamentSchema", () => {
 
   it("rejects a name that is too short", () => {
     expect(createTournamentSchema.safeParse(validInput({ name: "FC" })).success).toBe(false);
+  });
+});
+
+describe("editTournamentSchema", () => {
+  const base = {
+    name: "FC Friday Cup",
+    maxPlayers: "16",
+    registrationEnd: new Date("2026-06-05T10:00:00Z"),
+    startDate: new Date("2026-06-06T20:00:00Z"),
+  };
+
+  it("accepts valid edits", () => {
+    expect(editTournamentSchema.safeParse(base).success).toBe(true);
+  });
+
+  it("rejects a start before the end of registration", () => {
+    const result = editTournamentSchema.safeParse({ ...base, startDate: new Date("2026-06-04T10:00:00Z") });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a too short name", () => {
+    expect(editTournamentSchema.safeParse({ ...base, name: "ab" }).success).toBe(false);
   });
 });

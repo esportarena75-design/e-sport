@@ -30,3 +30,24 @@ export const createTournamentSchema = z
   });
 
 export type CreateTournamentInput = z.infer<typeof createTournamentSchema>;
+
+export const editTournamentSchema = z
+  .object({
+    name: z.string().min(3, { error: "3 caractères minimum" }).max(80, { error: "80 caractères maximum" }),
+    description: z.string().max(500, { error: "500 caractères maximum" }).optional(),
+    rules: z.string().max(2000, { error: "2000 caractères maximum" }).optional(),
+    maxPlayers: z.string().min(1, { error: "Choisissez une taille" }),
+    registrationEnd: z.date({ error: "Date requise" }),
+    startDate: z.date({ error: "Date requise" }),
+  })
+  .superRefine((data, ctx) => {
+    if (data.registrationEnd > data.startDate) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Le tournoi doit démarrer après la fin des inscriptions",
+        path: ["startDate"],
+      });
+    }
+  });
+
+export type EditTournamentInput = z.infer<typeof editTournamentSchema>;
