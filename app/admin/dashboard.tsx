@@ -66,6 +66,11 @@ function AdminDashboardContent() {
               <Text className="text-text">Journal</Text>
             </Pressable>
           </Link>
+          <Link href="/admin/news" asChild>
+            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
+              <Text className="text-text">Actus</Text>
+            </Pressable>
+          </Link>
         </View>
       </View>
 

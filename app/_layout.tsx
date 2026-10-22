@@ -122,6 +122,24 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="admin/news/index"
+          options={{
+            headerShown: true,
+            title: "Actus",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
+          name="admin/news/create"
+          options={{
+            headerShown: true,
+            title: "Ajouter une actu",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="admin/users"
           options={{
             headerShown: true,

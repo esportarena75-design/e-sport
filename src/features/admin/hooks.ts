@@ -3,17 +3,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   applySanction,
   cancelTournament,
+  createNews,
   createTournament,
+  deleteNews,
   disqualifyParticipant,
   forfeitMatch,
   getAdminUser,
   liftSanction,
   listAdminLogs,
+  listAllNews,
   listUserSanctions,
   listAllTournamentsForAdmin,
   listOpenDisputes,
   resolveDispute,
   scheduleMatch,
+  setNewsPublished,
   searchUsers,
   updateTournament,
   updateTournamentStatus,
@@ -156,4 +160,31 @@ export function useAdminLogs() {
 export function useUpdateTournament(tournamentId: string) {
   const invalidate = useInvalidateAfterAdminAction(tournamentId);
   return useMutation({ mutationFn: updateTournament, onSuccess: invalidate });
+}
+
+function useInvalidateNews() {
+  const queryClient = useQueryClient();
+  return () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-news"] });
+    queryClient.invalidateQueries({ queryKey: ["news"] });
+  };
+}
+
+export function useAdminNews() {
+  return useQuery({ queryKey: ["admin-news"], queryFn: listAllNews });
+}
+
+export function useCreateNews() {
+  const invalidate = useInvalidateNews();
+  return useMutation({ mutationFn: createNews, onSuccess: invalidate });
+}
+
+export function useSetNewsPublished() {
+  const invalidate = useInvalidateNews();
+  return useMutation({ mutationFn: setNewsPublished, onSuccess: invalidate });
+}
+
+export function useDeleteNews() {
+  const invalidate = useInvalidateNews();
+  return useMutation({ mutationFn: deleteNews, onSuccess: invalidate });
 }

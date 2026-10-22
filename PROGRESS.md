@@ -35,7 +35,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
 - [x] Liste des tournois : recherche avec délai (plus de requête à chaque frappe), jokers `%` `_` neutralisés, tirer pour rafraîchir.
 - [x] Notifications : « Tout marquer comme lu » et écran d'erreur avec réessai.
-- [x] **Espace admin : joueurs et journal** — écran Joueurs (recherche par pseudo, fiche avec historique des sanctions, sanctionner, lever une suspension/un ban) et écran Journal (actions admin lisibles). **Modifier un tournoi** (bouton « Modifier » du dashboard, avant génération du bracket). Reste à faire : gérer les actus, vérifier l'affichage des preuves dans les litiges.
+- [x] **Espace admin : joueurs et journal** — écran Joueurs (recherche par pseudo, fiche avec historique des sanctions, sanctionner, lever une suspension/un ban) et écran Journal (actions admin lisibles). **Modifier un tournoi** (bouton « Modifier » du dashboard, avant génération du bracket). **Actus** : écran Actus (masquer / publier / supprimer, ajouter une actu manuelle) via les policies RLS existantes, sans migration. Reste à faire : vérifier l'affichage des preuves dans les litiges.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
