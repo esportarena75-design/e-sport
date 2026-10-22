@@ -117,7 +117,7 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Joueurs",
-            headerStyle: {{ backgroundColor: colors.surface }},
+            headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
           }}
         />
@@ -126,7 +126,7 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Joueur",
-            headerStyle: {{ backgroundColor: colors.surface }},
+            headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
           }}
         />
@@ -135,7 +135,7 @@ function RootNavigator() {
           options={{
             headerShown: true,
             title: "Journal admin",
-            headerStyle: {{ backgroundColor: colors.surface }},
+            headerStyle: { backgroundColor: colors.surface },
             headerTintColor: colors.text,
           }}
         />
