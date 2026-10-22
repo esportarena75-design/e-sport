@@ -2,11 +2,12 @@ import { ActivityIndicator, Alert, FlatList, Text, View } from "react-native";
 
 import { AdminGuard } from "@/components/AdminGuard";
 import { Button } from "@/components/Button";
+import { EvidenceImage } from "@/components/EvidenceImage";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
 import { toFriendlyAdminError } from "@/features/admin/errors";
 import { useOpenDisputes, useResolveDispute } from "@/features/admin/hooks";
-import { useMatch } from "@/features/matches/hooks";
+import { useMatch, useMatchReports } from "@/features/matches/hooks";
 import type { Dispute } from "@/types/database";
 
 const REASON_LABELS: Record<string, string> = {
@@ -59,6 +60,7 @@ function AdminDisputesContent() {
 
 function DisputeRow({ dispute }: { dispute: Dispute }) {
   const { data: match } = useMatch(dispute.match_id);
+  const { data: reports } = useMatchReports(dispute.match_id);
   const resolveDispute = useResolveDispute();
 
   const handleResolve = (winnerId: string | undefined, decision: string) => {
@@ -90,6 +92,30 @@ function DisputeRow({ dispute }: { dispute: Dispute }) {
           {match.player_1_username ?? "?"} vs {match.player_2_username ?? "?"} (
           {match.player_1_score ?? "-"} - {match.player_2_score ?? "-"})
         </Text>
+      ) : null}
+
+      {(reports ?? []).map((report) => {
+        const reporter =
+          report.reported_by === match?.player_1_id
+            ? match?.player_1_username
+            : report.reported_by === match?.player_2_id
+              ? match?.player_2_username
+              : null;
+        return (
+          <View key={report.id} className="gap-1 rounded-xl border border-border p-3">
+            <Text className="text-sm text-text">
+              Score saisi par {reporter ?? "un joueur"} : {report.player_1_score} - {report.player_2_score}
+            </Text>
+            {report.comment ? <Text className="text-sm text-muted">{report.comment}</Text> : null}
+            {report.evidence_path ? (
+              <EvidenceImage path={report.evidence_path} label="Preuve jointe au score" />
+            ) : null}
+          </View>
+        );
+      })}
+
+      {dispute.evidence_path ? (
+        <EvidenceImage path={dispute.evidence_path} label="Preuve jointe au litige" />
       ) : null}
 
       <View className="flex-row flex-wrap gap-2">

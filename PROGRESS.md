@@ -35,11 +35,12 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
 - [x] Liste des tournois : recherche avec délai (plus de requête à chaque frappe), jokers `%` `_` neutralisés, tirer pour rafraîchir.
 - [x] Notifications : « Tout marquer comme lu » et écran d'erreur avec réessai.
-- [x] **Espace admin : joueurs et journal** — écran Joueurs (recherche par pseudo, fiche avec historique des sanctions, sanctionner, lever une suspension/un ban) et écran Journal (actions admin lisibles). **Modifier un tournoi** (bouton « Modifier » du dashboard, avant génération du bracket). **Actus** : écran Actus (masquer / publier / supprimer, ajouter une actu manuelle) via les policies RLS existantes, sans migration. Reste à faire : vérifier l'affichage des preuves dans les litiges.
+- [x] **Espace admin : joueurs et journal** — écran Joueurs (recherche par pseudo, fiche avec historique des sanctions, sanctionner, lever une suspension/un ban) et écran Journal (actions admin lisibles). **Modifier un tournoi** (bouton « Modifier » du dashboard, avant génération du bracket). **Actus** : écran Actus (masquer / publier / supprimer, ajouter une actu manuelle) via les policies RLS existantes, sans migration. **Litiges** : l'admin voit désormais les scores saisis, les commentaires et les captures (preuves). Plus rien en attente côté admin.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase
 <!-- Migrations créées mais pas encore lancées dans le SQL Editor. Le dev coche quand c'est fait. -->
+- [ ] `20261023020000_fix_reports_and_disputes_rls.sql` — **correctif** : les joueurs ne pouvaient lire aucun rapport de score (RLS sur `matches`), donc l'écran du match ne savait pas qui avait saisi le résultat ; les admins ne voyaient pas les rapports. Testée.
 - [ ] `20261023010000_admin_update_tournament.sql` — `admin_update_tournament` (nom, description, règlement, taille, fin des inscriptions, début ; avant génération du bracket ; inscrits prévenus si dates modifiées). Testée (`supabase/tests/update_tournament.sql`).
 - [ ] `20261023000000_admin_users_and_logs.sql` — `admin_search_users`, `admin_get_user`, `admin_lift_sanction`, `admin_list_logs` (admin uniquement, jamais d'e-mail). Testée (`supabase/tests/admin_users.sql`).
 - [ ] `20261022010000_tournaments_won_forfeit_final.sql` — une finale gagnée par forfait compte comme titre dans `player_stats`. Testée.

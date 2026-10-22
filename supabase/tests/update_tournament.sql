@@ -27,3 +27,15 @@ select public.admin_update_tournament(:'open_tid', 'Nouveau nom', 'desc', 'regle
 reset role;
 select case when name = 'Nouveau nom' and max_players = 16 and rules = 'regles' then 'ok tournoi modifie' else 'ECHEC modification' end as r from tournaments where id = :'open_tid';
 select case when count(*) >= 1 then 'ok journal update_tournament' else 'ECHEC journal' end as r from admin_logs where action = 'update_tournament';
+
+\echo '--- RLS : rapports et litiges visibles par les joueurs du match et par un admin'
+select r.match_id as rmid, m.player_1_id as rp1, m.player_2_id as rp2 from match_reports r join matches m on m.id = r.match_id limit 1 \gset
+select pg_temp.as_user(:'rp1'); set role authenticated;
+select case when count(*) >= 1 then 'ok joueur 1 lit les rapports de son match' else 'ECHEC joueur 1 ne voit rien' end as r from match_reports where match_id = :'rmid';
+reset role;
+select pg_temp.as_user('11111111-0000-0000-0000-000000000099'); set role authenticated;
+select case when count(*) = 0 then 'ok un tiers ne lit pas les rapports' else 'ECHEC fuite de rapports' end as r from match_reports where match_id = :'rmid';
+reset role;
+select pg_temp.as_user('00000000-0000-0000-0000-000000000001'); set role authenticated;
+select case when count(*) >= 1 then 'ok admin lit les rapports' else 'ECHEC admin ne voit rien' end as r from match_reports where match_id = :'rmid';
+reset role;
