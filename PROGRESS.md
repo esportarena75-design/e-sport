@@ -34,6 +34,7 @@ Session cloud, 2026-10-18 (branche `claude/finition`) :
 - [x] **ErrorBoundary global** (`app/_layout.tsx`) + **pages légales** CGU / confidentialité / règlement (`app/legal/[doc].tsx`, textes dans `src/constants/legal.ts`, liens « Lire le document » sous les cases d'inscription). ⚠ Textes = BROUILLONS à faire valider par un juriste (éditeur, contact RGPD, durées).
 - [x] **Planification des matchs** (section « Planifier les matchs » de l'écran Gérer : date + heure, joueurs notifiés, le compte à rebours de « Mes matchs » l'utilise) et **suspensions à durée** (1 / 3 / 7 / 30 jours ou indéfinie, levée automatique par tâche planifiée).
 - [x] Liste des tournois : recherche avec délai (plus de requête à chaque frappe), jokers `%` `_` neutralisés, tirer pour rafraîchir.
+- [x] Notifications : « Tout marquer comme lu » et écran d'erreur avec réessai.
 - [x] Banc de test SQL `supabase/tests/run.sh` : rejoue toutes les migrations sur un Postgres local et vérifie 7 scénarios.
 
 ## Migrations à appliquer dans Supabase

@@ -1,17 +1,24 @@
 import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 
+import { ErrorState } from "@/components/ErrorState";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
 import { useAuthStore } from "@/features/auth/store";
-import { useMarkNotificationRead, useNotifications } from "@/features/notifications/hooks";
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+} from "@/features/notifications/hooks";
 import type { NotificationRow } from "@/types/database";
 import { timeAgo } from "@/utils/time";
 
 export default function NotificationsScreen() {
   const session = useAuthStore((state) => state.session);
-  const { data: notifications, isLoading } = useNotifications(session?.user.id);
+  const { data: notifications, isLoading, isError, refetch } = useNotifications(session?.user.id);
   const markRead = useMarkNotificationRead(session?.user.id);
+  const markAllRead = useMarkAllNotificationsRead(session?.user.id);
+  const unreadCount = (notifications ?? []).filter((n) => !n.read).length;
 
   const handlePress = (notification: NotificationRow) => {
     if (!notification.read) {
@@ -36,8 +43,26 @@ export default function NotificationsScreen() {
     );
   }
 
+  if (isError) {
+    return (
+      <Screen>
+        <ErrorState message="Impossible de charger les notifications." onRetry={() => refetch()} />
+      </Screen>
+    );
+  }
+
   return (
     <Screen edges={["bottom"]}>
+      {unreadCount > 0 ? (
+        <Pressable
+          onPress={() => markAllRead.mutate()}
+          disabled={markAllRead.isPending}
+          accessibilityRole="button"
+          className="items-end pt-3"
+        >
+          <Text className="text-sm text-primary">Tout marquer comme lu ({unreadCount})</Text>
+        </Pressable>
+      ) : null}
       <FlatList
         data={notifications ?? []}
         keyExtractor={(item) => item.id}
