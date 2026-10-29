@@ -8,7 +8,9 @@ import {
   deleteNews,
   disqualifyParticipant,
   forfeitMatch,
+  getAdminOverview,
   getAdminUser,
+  listAdminMatches,
   liftSanction,
   listAdminLogs,
   listAllNews,
@@ -22,6 +24,7 @@ import {
   updateTournament,
   updateTournamentStatus,
 } from "@/features/admin/api";
+import type { AdminMatchFilter } from "@/utils/adminMatches";
 
 export function useAdminTournaments() {
   return useQuery({
@@ -82,6 +85,8 @@ function useInvalidateAfterAdminAction(tournamentId?: string) {
     queryClient.invalidateQueries({ queryKey: ["matches", tournamentId] });
     queryClient.invalidateQueries({ queryKey: ["matches"] });
     queryClient.invalidateQueries({ queryKey: ["match"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-matches"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-overview"] });
   };
 }
 
@@ -187,4 +192,12 @@ export function useSetNewsPublished() {
 export function useDeleteNews() {
   const invalidate = useInvalidateNews();
   return useMutation({ mutationFn: deleteNews, onSuccess: invalidate });
+}
+
+export function useAdminOverview() {
+  return useQuery({ queryKey: ["admin-overview"], queryFn: getAdminOverview, refetchInterval: 60_000 });
+}
+
+export function useAdminMatches(filter: AdminMatchFilter) {
+  return useQuery({ queryKey: ["admin-matches", filter], queryFn: () => listAdminMatches(filter) });
 }

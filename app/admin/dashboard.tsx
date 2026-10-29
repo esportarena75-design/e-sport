@@ -2,15 +2,16 @@ import { Link, router } from "expo-router";
 import { ActivityIndicator, Alert, FlatList, Pressable, Text, View } from "react-native";
 
 import { AdminGuard } from "@/components/AdminGuard";
+import { AdminTile } from "@/components/AdminTile";
 import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { StatusBadge } from "@/components/StatusBadge";
 import { colors } from "@/constants/colors";
 import { toFriendlyAdminError } from "@/features/admin/errors";
 import {
+  useAdminOverview,
   useAdminTournaments,
   useCancelTournament,
-  useOpenDisputes,
   useUpdateTournamentStatus,
 } from "@/features/admin/hooks";
 import { useGenerateBracket } from "@/features/bracket/hooks";
@@ -27,7 +28,7 @@ export default function AdminDashboardScreen() {
 
 function AdminDashboardContent() {
   const { data: tournaments, isLoading } = useAdminTournaments();
-  const { data: disputes } = useOpenDisputes();
+  const { data: overview } = useAdminOverview();
 
   if (isLoading) {
     return (
@@ -41,43 +42,57 @@ function AdminDashboardContent() {
 
   return (
     <Screen edges={["bottom"]}>
-      <View className="gap-3 py-4">
-        <Link href="/admin/tournament/create" asChild>
-          <Pressable className="items-center rounded-2xl bg-primary px-4 py-3">
-            <Text className="font-semibold text-white">+ Créer un tournoi</Text>
-          </Pressable>
-        </Link>
-
-        <Link href="/admin/disputes" asChild>
-          <Pressable className="flex-row items-center justify-between rounded-2xl border border-border bg-surface px-4 py-3">
-            <Text className="text-text">Litiges à traiter</Text>
-            <Text className="text-warning">{disputes?.length ?? 0}</Text>
-          </Pressable>
-        </Link>
-
-        <View className="flex-row gap-3">
-          <Link href="/admin/users" asChild>
-            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
-              <Text className="text-text">Joueurs</Text>
-            </Pressable>
-          </Link>
-          <Link href="/admin/logs" asChild>
-            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
-              <Text className="text-text">Journal</Text>
-            </Pressable>
-          </Link>
-          <Link href="/admin/news" asChild>
-            <Pressable className="flex-1 items-center rounded-2xl border border-border bg-surface px-4 py-3">
-              <Text className="text-text">Actus</Text>
-            </Pressable>
-          </Link>
-        </View>
-      </View>
-
       <FlatList
         data={tournaments ?? []}
         keyExtractor={(item) => item.id}
         contentContainerClassName="gap-3 pb-6"
+        ListHeaderComponent={
+          <View className="gap-4 py-4">
+            <Link href="/admin/tournament/create" asChild>
+              <Pressable className="items-center rounded-2xl bg-primary px-4 py-3">
+                <Text className="font-semibold text-white">+ Créer un tournoi</Text>
+              </Pressable>
+            </Link>
+
+            <View className="flex-row flex-wrap gap-3">
+              <AdminTile
+                label="Litiges"
+                icon="warning-outline"
+                href="/admin/disputes"
+                count={overview?.open_disputes}
+                alert
+                caption="À traiter"
+              />
+              <AdminTile
+                label="Matchs"
+                icon="game-controller-outline"
+                href="/admin/matches"
+                count={(overview?.matches_to_schedule ?? 0) + (overview?.matches_awaiting_confirmation ?? 0)}
+                alert
+                caption="À planifier ou confirmer"
+              />
+              <AdminTile
+                label="Annonces"
+                icon="megaphone-outline"
+                href="/admin/announcements"
+                caption={`${overview?.players ?? 0} joueurs actifs`}
+              />
+              <AdminTile
+                label="Joueurs"
+                icon="people-outline"
+                href="/admin/users"
+                count={overview?.sanctioned_users}
+                caption="Sanctions en cours"
+              />
+              <AdminTile label="Actus" icon="newspaper-outline" href="/admin/news" caption="Accueil de l'appli" />
+              <AdminTile label="Journal" icon="list-outline" href="/admin/logs" caption="Actions des admins" />
+            </View>
+
+            <Text className="text-lg font-semibold text-text">
+              Tournois · {overview?.tournaments_open ?? 0} ouverts · {overview?.tournaments_in_progress ?? 0} en cours
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => <TournamentAdminRow tournament={item} />}
         ListEmptyComponent={<Text className="mt-8 text-center text-muted">Aucun tournoi.</Text>}
       />
@@ -152,6 +167,11 @@ function TournamentAdminRow({ tournament }: { tournament: TournamentPublic }) {
             onPress={() => router.push(`/admin/tournament/${tournament.id}/edit`)}
           />
         ) : null}
+        <Button
+          title="Annoncer"
+          variant="secondary"
+          onPress={() => router.push(`/admin/announcements?tournamentId=${tournament.id}`)}
+        />
         <Button
           title="Gérer"
           variant="secondary"

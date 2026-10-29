@@ -66,6 +66,12 @@ export function toFriendlyAdminError(error: unknown): string {
   if (message.includes("Invalid tournament name")) {
     return "Le nom doit faire entre 3 et 80 caractères.";
   }
+  if (message.includes("Invalid announcement title")) {
+    return "Le titre doit faire entre 3 et 80 caractères.";
+  }
+  if (message.includes("Invalid announcement body")) {
+    return "Le message doit faire entre 3 et 500 caractères.";
+  }
   if (message.includes("A reason is required")) {
     return "Saisissez un motif (3 caractères minimum).";
   }

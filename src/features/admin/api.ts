@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
-import type { Dispute, Sanction, Tournament, TournamentPublic } from "@/types/database";
+import type { Dispute, MatchPublic, Sanction, Tournament, TournamentPublic } from "@/types/database";
+import { OPEN_ADMIN_STATUSES, type AdminMatchFilter } from "@/utils/adminMatches";
 
 export async function listAllTournamentsForAdmin(): Promise<TournamentPublic[]> {
   const { data, error } = await supabase
@@ -253,4 +254,42 @@ export async function setNewsPublished(input: { id: string; published: boolean }
 export async function deleteNews(id: string) {
   const { error } = await supabase.from("news").delete().eq("id", id);
   if (error) throw error;
+}
+
+export type AdminOverview = {
+  tournaments_open: number;
+  tournaments_in_progress: number;
+  open_disputes: number;
+  matches_to_schedule: number;
+  matches_awaiting_confirmation: number;
+  sanctioned_users: number;
+  players: number;
+};
+
+export async function getAdminOverview(): Promise<AdminOverview | null> {
+  const { data, error } = await supabase.rpc("admin_overview");
+  if (error) throw error;
+  return ((data ?? []) as AdminOverview[])[0] ?? null;
+}
+
+export async function listAdminMatches(filter: AdminMatchFilter): Promise<MatchPublic[]> {
+  let query = supabase.from("matches_public").select("*");
+
+  if (filter === "schedule") {
+    query = query
+      .in("status", ["SCHEDULED", "READY"])
+      .not("player_1_id", "is", null)
+      .not("player_2_id", "is", null)
+      .is("scheduled_at", null);
+  } else if (filter === "confirm") {
+    query = query.eq("status", "AWAITING_CONFIRMATION");
+  } else if (filter === "dispute") {
+    query = query.eq("status", "DISPUTED");
+  } else if (filter === "open") {
+    query = query.in("status", [...OPEN_ADMIN_STATUSES]);
+  }
+
+  const { data, error } = await query.order("created_at", { ascending: false }).limit(100);
+  if (error) throw error;
+  return data;
 }

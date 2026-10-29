@@ -34,6 +34,11 @@ describe("toFriendlyAdminError", () => {
     expect(toFriendlyAdminError(new Error("Max players is below the number of registered players"))).toContain("inscrits");
   });
 
+  it("maps announcement errors", () => {
+    expect(toFriendlyAdminError(new Error("Invalid announcement title"))).toContain("titre");
+    expect(toFriendlyAdminError(new Error("Invalid announcement body"))).toContain("message");
+  });
+
   it("falls back to a generic message", () => {
     expect(toFriendlyAdminError("boom")).toBe("Une erreur est survenue. Réessayez.");
   });

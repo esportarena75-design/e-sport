@@ -142,6 +142,24 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="admin/announcements"
+          options={{
+            headerShown: true,
+            title: "Annonces",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
+          name="admin/matches"
+          options={{
+            headerShown: true,
+            title: "Matchs",
+            headerStyle: { backgroundColor: colors.surface },
+            headerTintColor: colors.text,
+          }}
+        />
+        <Stack.Screen
           name="admin/users"
           options={{
             headerShown: true,
