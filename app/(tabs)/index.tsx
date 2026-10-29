@@ -5,6 +5,7 @@ import { ActivityIndicator, Image, Pressable, ScrollView, Text, View } from "rea
 
 import { MatchStatusBadge } from "@/components/MatchStatusBadge";
 import { NewsCard } from "@/components/NewsCard";
+import { NotificationBell } from "@/components/NotificationBell";
 import { Screen } from "@/components/Screen";
 import { colors } from "@/constants/colors";
 import { useProfile } from "@/features/auth/hooks";
@@ -50,15 +51,7 @@ export default function HomeScreen() {
             <Ionicons name="search" size={20} color={colors.text} />
           </Pressable>
           <Text className="flex-1 font-bold text-text text-3xl">Popular Games</Text>
-          <Pressable
-            onPress={() => router.push("/notifications")}
-            hitSlop={8}
-            className="justify-center items-center bg-surface p-2.5 rounded-full"
-            accessibilityRole="button"
-            accessibilityLabel="Notifications"
-          >
-            <Ionicons name="notifications-outline" size={20} color={colors.text} />
-          </Pressable>
+          <NotificationBell />
         </View>
 
         {games && games.length > 0 ? (

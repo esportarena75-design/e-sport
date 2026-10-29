@@ -1,12 +1,15 @@
 import { Link, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 import { Button } from "@/components/Button";
 import { Screen } from "@/components/Screen";
 import { StatusBadge } from "@/components/StatusBadge";
 import { colors } from "@/constants/colors";
+import { useTournamentAnnouncements } from "@/features/announcements/hooks";
 import { useAuthStore } from "@/features/auth/store";
+import { useMyMatches } from "@/features/matches/hooks";
+import { useSetTournamentMuted, useTournamentMuted } from "@/features/notifications/hooks";
 import { toFriendlyTournamentError } from "@/features/tournaments/errors";
 import {
   useJoinTournament,
@@ -14,7 +17,9 @@ import {
   useTournament,
   useTournamentParticipants,
 } from "@/features/tournaments/hooks";
-import { displayStatus, isRegistrationOpen } from "@/utils/time";
+import { useNow } from "@/hooks/useNow";
+import { formatCountdown, formatMatchDate, getMatchStart, splitMyMatches } from "@/utils/matches";
+import { displayStatus, isRegistrationOpen, timeAgo } from "@/utils/time";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("fr-FR", {
@@ -34,6 +39,12 @@ export default function TournamentDetailScreen() {
   const joinTournament = useJoinTournament(id);
   const leaveTournament = useLeaveTournament(id, session?.user.id);
   const [actionError, setActionError] = useState<string | null>(null);
+  const myId = session?.user.id;
+  const now = useNow(1000);
+  const { data: muted } = useTournamentMuted(myId, id);
+  const setMuted = useSetTournamentMuted(myId, id);
+  const { data: announcements } = useTournamentAnnouncements(id);
+  const { data: myMatches } = useMyMatches(myId);
 
   if (isLoading || !tournament) {
     return (
@@ -50,6 +61,12 @@ export default function TournamentDetailScreen() {
   const registrationOpen = isRegistrationOpen(tournament);
   const canJoin = registrationOpen && !myParticipation && !isFull;
   const canLeave = registrationOpen && !!myParticipation;
+  const beforeStart =
+    (tournament.status === "REGISTRATION_OPEN" || tournament.status === "REGISTRATION_CLOSED") &&
+    new Date(tournament.start_date).getTime() > now;
+  const nextMatch = splitMyMatches(
+    (myMatches ?? []).filter((m) => m.tournament_id === tournament.id),
+  ).upcoming.find((m) => m.player_1_id && m.player_2_id);
 
   const handleJoin = async () => {
     setActionError(null);
@@ -90,6 +107,37 @@ export default function TournamentDetailScreen() {
           {tournament.game_name} · {tournament.platform_name} · {tournament.format}
         </Text>
 
+        {beforeStart ? (
+          <View className="items-center gap-1 bg-surface p-4 border border-border rounded-2xl">
+            <Text className="text-muted text-sm">Début du tournoi dans</Text>
+            <Text className="font-bold text-text text-2xl">
+              {formatCountdown(tournament.start_date, now)}
+            </Text>
+          </View>
+        ) : null}
+
+        {myParticipation && nextMatch ? (
+          <Link href={`/match/${nextMatch.id}`} asChild>
+            <Pressable className="gap-1 bg-surface p-4 border border-primary rounded-2xl">
+              <Text className="text-muted text-sm">Votre prochain match</Text>
+              <Text className="font-semibold text-text">
+                vs{" "}
+                {(myId === nextMatch.player_1_id
+                  ? nextMatch.player_2_username
+                  : nextMatch.player_1_username) ?? "?"}
+              </Text>
+              <Text className="text-primary text-sm">
+                {(() => {
+                  const start = getMatchStart(nextMatch);
+                  return start
+                    ? `${formatMatchDate(start)} · ${formatCountdown(start, now)}`
+                    : "Date à définir : vous serez prévenu";
+                })()}
+              </Text>
+            </Pressable>
+          </Link>
+        ) : null}
+
         {tournament.description ? (
           <Text className="text-text">{tournament.description}</Text>
         ) : null}
@@ -128,10 +176,42 @@ export default function TournamentDetailScreen() {
           </Link>
         ) : null}
 
+        {announcements && announcements.length > 0 ? (
+          <View className="gap-2">
+            <Text className="font-semibold text-text text-lg">Annonces</Text>
+            {announcements.map((a) => (
+              <View key={a.id} className="gap-1 bg-surface p-4 border border-border rounded-2xl">
+                <View className="flex-row justify-between items-center gap-2">
+                  <Text className="flex-1 font-semibold text-text">{a.title}</Text>
+                  <Text className="text-muted text-xs">{timeAgo(a.created_at)}</Text>
+                </View>
+                <Text className="text-muted">{a.body}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
         {actionError ? <Text className="text-error text-sm">{actionError}</Text> : null}
 
         {myParticipation ? (
-          <Text className="text-success text-center">Vous êtes inscrit à ce tournoi</Text>
+          <View className="gap-3 bg-surface p-4 border border-border rounded-2xl">
+            <Text className="font-semibold text-success">Vous êtes inscrit à ce tournoi</Text>
+            <View className="flex-row justify-between items-center gap-3">
+              <View className="flex-1 gap-0.5">
+                <Text className="text-text">Notifications du tournoi</Text>
+                <Text className="text-muted text-xs">
+                  Début et adversaire, rappels, résultats, annonces des organisateurs.
+                </Text>
+              </View>
+              <Switch
+                value={!muted}
+                disabled={setMuted.isPending}
+                onValueChange={(on) => setMuted.mutate(!on)}
+                trackColor={{ true: colors.primary }}
+                accessibilityLabel="Notifications du tournoi"
+              />
+            </View>
+          </View>
         ) : null}
 
         {canJoin ? (

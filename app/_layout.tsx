@@ -10,6 +10,7 @@ import { colors } from "@/constants/colors";
 import { signOut } from "@/features/auth/api";
 import { useProfile } from "@/features/auth/hooks";
 import { initAuthListener, useAuthStore } from "@/features/auth/store";
+import { usePushNavigation } from "@/features/notifications/usePushNavigation";
 import { usePushRegistration } from "@/features/notifications/usePushRegistration";
 import { queryClient } from "@/lib/queryClient";
 
@@ -23,6 +24,7 @@ function RootNavigator() {
   }, []);
 
   usePushRegistration(session?.user.id);
+  usePushNavigation(status === "authenticated");
 
   useEffect(() => {
     if (profile && profile.status !== "ACTIVE") {

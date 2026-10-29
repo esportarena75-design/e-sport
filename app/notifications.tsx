@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 
@@ -11,6 +12,7 @@ import {
   useNotifications,
 } from "@/features/notifications/hooks";
 import type { NotificationRow } from "@/types/database";
+import { notificationIcon, notificationTarget } from "@/utils/notifications";
 import { timeAgo } from "@/utils/time";
 
 export default function NotificationsScreen() {
@@ -24,13 +26,11 @@ export default function NotificationsScreen() {
     if (!notification.read) {
       markRead.mutate(notification.id);
     }
-    const matchId = (notification.data as { match_id?: string } | null)?.match_id;
-    const tournamentId = (notification.data as { tournament_id?: string } | null)?.tournament_id;
-    if (matchId) {
-      router.push(`/match/${matchId}`);
-    } else if (tournamentId) {
-      router.push(`/tournament/${tournamentId}`);
-    }
+    const target = notificationTarget(
+      notification.type,
+      notification.data as Record<string, unknown> | null,
+    );
+    if (target) router.push(target as never);
   };
 
   if (isLoading) {
@@ -74,8 +74,13 @@ export default function NotificationsScreen() {
               item.read ? "border-border bg-surface" : "border-primary bg-surface"
             }`}
           >
-            <View className="flex-row items-center justify-between">
-              <Text className="font-semibold text-text">{item.title}</Text>
+            <View className="flex-row items-center justify-between gap-2">
+              <Ionicons
+                name={notificationIcon(item.type)}
+                size={18}
+                color={item.read ? colors.muted : colors.primary}
+              />
+              <Text className="flex-1 font-semibold text-text">{item.title}</Text>
               <Text className="text-xs text-muted">{timeAgo(item.created_at)}</Text>
             </View>
             <Text className="text-muted">{item.body}</Text>

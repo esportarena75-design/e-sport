@@ -42,3 +42,33 @@ export async function registerDevice(input: {
   );
   if (error) throw error;
 }
+
+export async function isTournamentMuted(userId: string, tournamentId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("notification_mutes")
+    .select("tournament_id")
+    .eq("user_id", userId)
+    .eq("tournament_id", tournamentId)
+    .maybeSingle();
+  if (error) throw error;
+  return !!data;
+}
+
+export async function setTournamentMuted(input: { userId: string; tournamentId: string; muted: boolean }) {
+  if (input.muted) {
+    const { error } = await supabase
+      .from("notification_mutes")
+      .upsert(
+        { user_id: input.userId, tournament_id: input.tournamentId },
+        { ignoreDuplicates: true },
+      );
+    if (error) throw error;
+  } else {
+    const { error } = await supabase
+      .from("notification_mutes")
+      .delete()
+      .eq("user_id", input.userId)
+      .eq("tournament_id", input.tournamentId);
+    if (error) throw error;
+  }
+}

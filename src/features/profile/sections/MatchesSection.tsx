@@ -3,9 +3,11 @@ import { router } from "expo-router";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 import { MatchStatusBadge } from "@/components/MatchStatusBadge";
+import { TournamentCard } from "@/components/TournamentCard";
 import { colors } from "@/constants/colors";
 import { useAuthStore } from "@/features/auth/store";
 import { useMyMatches } from "@/features/matches/hooks";
+import { useMyTournaments } from "@/features/tournaments/hooks";
 import { useNow } from "@/hooks/useNow";
 import type { MatchPublic } from "@/types/database";
 import { isBye } from "@/utils/bracket";
@@ -15,6 +17,7 @@ export function MatchesSection() {
   const session = useAuthStore((state) => state.session);
   const myId = session?.user.id;
   const { data: matches, isLoading, isError, refetch } = useMyMatches(myId);
+  const { data: myTournaments } = useMyTournaments(myId);
   const now = useNow(1000);
 
   if (isLoading) return <ActivityIndicator color={colors.primary} />;
@@ -31,8 +34,21 @@ export function MatchesSection() {
 
   const { upcoming, history } = splitMyMatches(matches ?? []);
 
+  const activeTournaments = (myTournaments ?? []).filter(
+    (t) => t.status !== "COMPLETED" && t.status !== "CANCELLED",
+  );
+
   return (
     <View className="gap-6">
+      {activeTournaments.length > 0 ? (
+        <View className="gap-3">
+          <Text className="text-lg font-semibold text-text">Mes tournois</Text>
+          {activeTournaments.map((t) => (
+            <TournamentCard key={t.id} tournament={t} />
+          ))}
+        </View>
+      ) : null}
+
       <View className="gap-3">
         <Text className="text-lg font-semibold text-text">À venir</Text>
         {upcoming.length === 0 ? (
